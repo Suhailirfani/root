@@ -1,0 +1,7 @@
+Django==5.2.8
+python-dateutil==2.9.0.post0
+Pillow==10.2.0
+whitenoise==6.11.0
+sqlparse==0.4.4
+asgiref==3.11.0
+tzdata==2023.4
