@@ -21,11 +21,11 @@
                 {% csrf_token %}
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Exam Name</label>
-                    <input type="text" id="name" name="name" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2" placeholder="e.g. Monthly Test 3">
+                    <input type="text" id="name" name="name" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-base sm:text-sm px-3 py-3 md:py-2" placeholder="e.g. Monthly Test 3">
                 </div>
                 <div>
                     <label for="class_id" class="block text-sm font-medium text-gray-700 mb-1">Target Class/Batch</label>
-                    <select id="class_id" name="class_id" required class="block w-full rounded-lg border-gray-300 shadow-sm sm:text-sm px-3 py-2">
+                    <select id="class_id" name="class_id" required class="block w-full rounded-lg border-gray-300 shadow-sm text-base sm:text-sm px-3 py-3 md:py-2">
                         {% for cls in classes %}
                             <option value="{{ cls.id }}">{{ cls.name }}</option>
                         {% endfor %}
@@ -33,9 +33,9 @@
                 </div>
                 <div>
                     <label for="max_marks" class="block text-sm font-medium text-gray-700 mb-1">Max Marks</label>
-                    <input type="number" step="0.01" id="max_marks" name="max_marks" required class="block w-full rounded-lg border-gray-300 shadow-sm sm:text-sm px-3 py-2" placeholder="100">
+                    <input type="number" step="0.01" id="max_marks" name="max_marks" required class="block w-full rounded-lg border-gray-300 shadow-sm text-base sm:text-sm px-3 py-3 md:py-2" placeholder="100">
                 </div>
-                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                <button type="submit" class="w-full flex justify-center py-3 md:py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
                     Create Exam
                 </button>
             </form>
@@ -43,7 +43,8 @@
 
         <!-- Exam List -->
         <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden h-[600px] overflow-y-auto custom-scrollbar">
-            <table class="min-w-full divide-y divide-gray-200">
+            <!-- Desktop Table View -->
+            <table class="min-w-full divide-y divide-gray-200 hidden md:table">
                 <thead class="bg-gray-50 sticky top-0">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exam Name</th>
@@ -67,6 +68,23 @@
                     {% endfor %}
                 </tbody>
             </table>
+
+            <!-- Mobile Card View -->
+            <div class="md:hidden divide-y divide-gray-100">
+                {% for exam in exams %}
+                <div class="p-4 hover:bg-gray-50">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-sm font-bold text-gray-900">{{ exam.name }}</p>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                            Max: {{ exam.max_marks|floatformat:0 }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-500">Class: {{ exam.class_group.name }} &bull; {{ exam.date|date:"M d, Y" }}</p>
+                </div>
+                {% empty %}
+                <div class="p-6 text-center text-sm text-gray-500">No exams created.</div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>

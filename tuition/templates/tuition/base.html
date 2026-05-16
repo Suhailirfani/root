@@ -57,9 +57,9 @@
                 </div>
                 <div class="flex items-center">
                     {% if request.session.logged_in_student %}
-                        <a href="{% url 'parent_logout' %}" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">Parent Logout</a>
+                        <a href="{% url 'parent_logout' %}" class="text-gray-500 hover:text-gray-900 px-3 py-3 md:py-2 rounded-md text-base md:text-sm font-medium transition-colors">Parent Logout</a>
                     {% elif request.user.is_authenticated %}
-                        <a href="{% url 'teacher_logout' %}" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">Logout ({{ request.user.username }})</a>
+                        <a href="{% url 'teacher_logout' %}" class="text-gray-500 hover:text-gray-900 px-3 py-3 md:py-2 rounded-md text-base md:text-sm font-medium transition-colors">Logout ({{ request.user.username }})</a>
                     {% endif %}
                 </div>
             </div>
