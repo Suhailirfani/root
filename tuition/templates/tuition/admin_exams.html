@@ -1,0 +1,80 @@
+{% extends 'tuition/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Manage Exams</h1>
+            <p class="text-gray-500">Create new tests and exams</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="text-sm font-medium text-brand-600 hover:text-brand-500">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Add Exam Form -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Create Exam</h2>
+            <form method="POST" action="{% url 'admin_exams' %}" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Exam Name</label>
+                    <input type="text" id="name" name="name" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2" placeholder="e.g. Monthly Test 3">
+                </div>
+                <div>
+                    <label for="class_id" class="block text-sm font-medium text-gray-700 mb-1">Target Class/Batch</label>
+                    <select id="class_id" name="class_id" required class="block w-full rounded-lg border-gray-300 shadow-sm sm:text-sm px-3 py-2">
+                        {% for cls in classes %}
+                            <option value="{{ cls.id }}">{{ cls.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="max_marks" class="block text-sm font-medium text-gray-700 mb-1">Max Marks</label>
+                    <input type="number" step="0.01" id="max_marks" name="max_marks" required class="block w-full rounded-lg border-gray-300 shadow-sm sm:text-sm px-3 py-2" placeholder="100">
+                </div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                    Create Exam
+                </button>
+            </form>
+        </div>
+
+        <!-- Exam List -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden h-[600px] overflow-y-auto custom-scrollbar">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exam Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max Marks</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for exam in exams %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ exam.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ exam.class_group.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ exam.date }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ exam.max_marks|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No exams created.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+{% endblock %}

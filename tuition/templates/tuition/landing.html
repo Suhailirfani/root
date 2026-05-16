@@ -1,0 +1,93 @@
+{% extends 'tuition/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-white">
+    
+    <!-- Abstract Background Shapes -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute top-0 -left-4 w-72 h-72 bg-brand-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-blob"></div>
+        <div class="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center text-center">
+        <!-- Logo -->
+        <div class="mb-8 transform hover:scale-105 transition-transform duration-300">
+            <img src="{% static 'images/logo-removebg.png' %}" alt="ROOT Tuition Centre Logo" class="h-32 w-auto">
+        </div>
+        
+        <!-- Hero Tagline -->
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-50 border border-brand-100 text-brand-600 text-sm font-semibold mb-8 shadow-sm">
+            <span class="flex h-2 w-2 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+            </span>
+            Next-Gen Student Management
+        </div>
+
+        <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
+            Empower Education with <br class="hidden md:block" />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-purple-600">ROOT Tuition Centre</span>
+        </h1>
+        
+        <p class="mt-4 max-w-2xl text-xl text-gray-500 mb-12">
+            Seamlessly connect teachers, students, and parents. Track attendance, monitor performance, and celebrate achievements in one unified platform.
+        </p>
+
+        <!-- Portal Selection Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl mx-auto mt-8">
+            
+            <!-- Parent Portal Card -->
+            <a href="{% url 'parent_login' %}" class="group relative bg-white/60 backdrop-blur-xl border border-white/40 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-300 overflow-hidden text-left flex flex-col h-full">
+                <div class="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div class="h-16 w-16 bg-gradient-to-br from-brand-500 to-brand-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-md transform group-hover:scale-110 transition-transform duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-brand-600 transition-colors">Parent Portal</h3>
+                <p class="text-gray-600 flex-grow">Access your child's attendance records, track test performance, and view class standings instantly.</p>
+                <div class="mt-6 flex items-center text-brand-600 font-semibold group-hover:translate-x-2 transition-transform duration-300">
+                    Login securely <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </div>
+            </a>
+
+            <!-- Teacher Portal Card -->
+            <a href="{% url 'teacher_login' %}" class="group relative bg-white/60 backdrop-blur-xl border border-white/40 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-300 overflow-hidden text-left flex flex-col h-full">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div class="h-16 w-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-md transform group-hover:scale-110 transition-transform duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">Teacher & Admin Portal</h3>
+                <p class="text-gray-600 flex-grow">Manage classes, record daily attendance, input exam marks, and access the global admin dashboard.</p>
+                <div class="mt-6 flex items-center text-purple-600 font-semibold group-hover:translate-x-2 transition-transform duration-300">
+                    Access dashboard <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes blob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+    }
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+    .animation-delay-4000 {
+        animation-delay: 4s;
+    }
+</style>
+{% endblock %}
