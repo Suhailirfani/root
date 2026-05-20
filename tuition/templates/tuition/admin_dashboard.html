@@ -25,7 +25,7 @@
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Total Students -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition-shadow">
             <div>
@@ -39,13 +39,26 @@
             </div>
         </div>
 
+        <!-- Total Teachers -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition-shadow">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-1">Total Teachers</p>
+                <p class="text-4xl font-extrabold text-gray-900">{{ total_teachers }}</p>
+            </div>
+            <div class="h-14 w-14 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center transform -rotate-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            </div>
+        </div>
+
         <!-- Present Today -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition-shadow">
             <div>
                 <p class="text-sm font-medium text-gray-500 mb-1">Present Today</p>
                 <p class="text-4xl font-extrabold text-green-600">{{ total_present }}</p>
             </div>
-            <div class="h-14 w-14 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center transform -rotate-3">
+            <div class="h-14 w-14 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center transform rotate-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
@@ -58,7 +71,7 @@
                 <p class="text-sm font-medium text-gray-500 mb-1">Absent Today</p>
                 <p class="text-4xl font-extrabold text-red-600">{{ total_absent }}</p>
             </div>
-            <div class="h-14 w-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center transform rotate-3">
+            <div class="h-14 w-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center transform -rotate-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -76,7 +89,7 @@
             System Management
         </h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             
             <a href="{% url 'admin_classes' %}" class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-4 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -84,6 +97,14 @@
                 </svg>
                 <h3 class="text-xl font-bold mb-1">Manage Classes</h3>
                 <p class="text-indigo-100 text-sm">Add or edit batches and assign teachers.</p>
+            </a>
+
+            <a href="{% url 'admin_teachers' %}" class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-4 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <h3 class="text-xl font-bold mb-1">Manage Teachers</h3>
+                <p class="text-purple-100 text-sm">Add and onboard teachers to the system.</p>
             </a>
 
             <a href="{% url 'admin_students' %}" class="bg-gradient-to-br from-brand-500 to-brand-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
@@ -100,6 +121,14 @@
                 </svg>
                 <h3 class="text-xl font-bold mb-1">Manage Exams</h3>
                 <p class="text-orange-100 text-sm">Create tests and exams for classes to grade.</p>
+            </a>
+
+            <a href="{% url 'admin_working_days' %}" class="bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-4 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3 class="text-xl font-bold mb-1">Working Days</h3>
+                <p class="text-teal-100 text-sm">Configure working days for accurate attendance.</p>
             </a>
 
         </div>

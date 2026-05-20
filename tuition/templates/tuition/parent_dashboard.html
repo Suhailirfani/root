@@ -14,69 +14,327 @@
                 <p class="text-gray-500">ID: {{ student.student_id }} &bull; {{ student.class_group.name }}</p>
             </div>
         </div>
-        <div class="bg-gradient-to-br from-brand-50 to-white border border-brand-100 px-6 py-4 rounded-xl text-center shadow-sm">
-            <p class="text-sm font-medium text-gray-500 mb-1">Attendance</p>
-            <p class="text-3xl font-bold {% if attendance_percentage >= 80 %}text-green-600{% elif attendance_percentage >= 60 %}text-yellow-600{% else %}text-red-600{% endif %}">
-                {{ attendance_percentage|floatformat:1 }}%
-            </p>
+        <div class="flex items-center gap-4">
+            <div class="bg-gradient-to-br from-brand-50 to-white border border-brand-100 px-6 py-4 rounded-xl text-center shadow-sm min-w-[120px]">
+                <p class="text-sm font-medium text-gray-500 mb-1">Attendance</p>
+                <p class="text-3xl font-bold {% if attendance_percentage >= 80 %}text-green-600{% elif attendance_percentage >= 60 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                    {{ attendance_percentage|floatformat:1 }}%
+                </p>
+            </div>
+            <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 px-5 py-4 rounded-xl text-center shadow-sm min-w-[120px] flex flex-col items-center justify-center">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Today's Status</p>
+                {% if today_status == 'present' %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
+                        <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                        Present
+                    </span>
+                {% elif today_status == 'absent' %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
+                        <span class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                        Absent
+                    </span>
+                {% elif today_status == 'late' %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-200">
+                        <span class="h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                        Late
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200">
+                        <span class="h-2 w-2 rounded-full bg-gray-400"></span>
+                        Not Marked
+                    </span>
+                {% endif %}
+            </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <!-- Performance Chart -->
-        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+    <!-- Today's Tasks Section (Malayalam) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden border-l-4 border-brand-500">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-brand-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                  <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
                 </svg>
-                Performance Overview
+                ഇന്നത്തെ ഗൃഹപാഠം <span class="text-xs text-gray-400 font-normal ml-2">(Today's Tasks)</span>
             </h2>
-            <div class="relative h-[300px] w-full">
-                <canvas id="performanceChart"></canvas>
-            </div>
+            <span class="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                {{ today_tasks.count }} ഗൃഹപാഠങ്ങൾ
+            </span>
+        </div>
+        <div class="p-6 space-y-4">
+            {% for task in today_tasks %}
+                <div class="p-4 rounded-xl bg-brand-50 border border-brand-100 flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            {% if task.subject %}
+                                <span class="px-2 py-0.5 rounded text-[10px] bg-brand-100 text-brand-800 font-bold uppercase">
+                                    വിഷയം: {{ task.subject.name }}
+                                </span>
+                            {% else %}
+                                <span class="px-2 py-0.5 rounded text-[10px] bg-gray-200 text-gray-700 font-bold uppercase">
+                                    പൊതുവായത് (General)
+                                </span>
+                            {% endif %}
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900">{{ task.title }}</h3>
+                        {% if task.description %}
+                            <p class="text-sm text-gray-600 mt-1 leading-relaxed">{{ task.description }}</p>
+                        {% endif %}
+                    </div>
+                    {% if task.created_by %}
+                        <div class="text-left md:text-right flex-shrink-0">
+                            <span class="text-xs text-gray-400">നൽകിയത്:</span>
+                            <p class="text-xs font-semibold text-gray-600">{{ task.created_by.first_name|default:task.created_by.username }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <div class="text-center py-8 text-gray-500 space-y-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-300 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-sm font-semibold text-gray-700">ഇന്നത്തേക്ക് ഗൃഹപാഠങ്ങൾ ഒന്നും നൽകിയിട്ടില്ല.</p>
+                    <p class="text-xs text-gray-400">No homework has been assigned for today.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Mark List (All Exams) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-100">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                Detailed Mark List
+            </h2>
+        </div>
+        
+        <!-- Desktop Table View -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 hidden md:table">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exam Name</th>
+                        {% for subject in subjects %}
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{{ subject.name }}</th>
+                        {% empty %}
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Marks</th>
+                        {% endfor %}
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Marks</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Percentage</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for item in detailed_mark_list %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.exam.date|date:"M d, Y" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{{ item.exam.name }}</td>
+                        
+                        {% for m in item.row_marks %}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                {% if m.has_mark %}
+                                    <span class="font-semibold {% if m.is_pass %}text-green-600{% else %}text-red-600{% endif %}">
+                                        {{ m.obtained|floatformat:0 }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-300">-</span>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-medium text-gray-900">
+                            {{ item.total_obtained|floatformat:0 }} / {{ item.total_max|floatformat:0 }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                            {{ item.percentage|floatformat:1 }}%
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                            {% if item.is_pass %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Pass</span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Fail</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="px-6 py-8 text-center text-sm text-gray-500">No exams have been graded yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
-        <!-- Leaderboard -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
-            <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clip-rule="evenodd" />
-                </svg>
-                Class Standings
-            </h2>
-            
-            <div class="flex-grow overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                {% for entry in leaderboard %}
-                    <div class="flex items-center justify-between p-3 rounded-xl transition-all duration-200 
-                        {% if entry.is_current %}bg-brand-50 border border-brand-200 shadow-sm{% else %}bg-gray-50 border border-transparent hover:bg-gray-100{% endif %}">
-                        
-                        <div class="flex items-center gap-3">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm
-                                {% if entry.rank == 1 %}bg-yellow-100 text-yellow-700
-                                {% elif entry.rank == 2 %}bg-gray-200 text-gray-700
-                                {% elif entry.rank == 3 %}bg-orange-100 text-orange-700
-                                {% else %}bg-white text-gray-500 shadow-sm{% endif %}">
-                                #{{ entry.rank }}
-                            </div>
-                            <div>
-                                <p class="font-medium {% if entry.is_current %}text-brand-900{% else %}text-gray-900{% endif %} text-sm">
-                                    {{ entry.student_name }}
-                                    {% if entry.is_current %}<span class="text-xs font-normal text-brand-600 ml-1">(You)</span>{% endif %}
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <div class="text-right">
-                            <p class="font-bold {% if entry.is_current %}text-brand-700{% else %}text-gray-900{% endif %}">
-                                {{ entry.total_marks|floatformat:0 }}
-                            </p>
-                            <p class="text-xs text-gray-500">/ {{ entry.total_max|floatformat:0 }}</p>
-                        </div>
+        <!-- Mobile Card View -->
+        <div class="md:hidden divide-y divide-gray-100">
+            {% for item in detailed_mark_list %}
+            <div class="p-4 hover:bg-gray-50 flex flex-col gap-4">
+                <!-- Header: Name & Date -->
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-bold text-gray-900">{{ item.exam.name }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ item.exam.date|date:"M d, Y" }}</p>
                     </div>
-                {% empty %}
-                    <p class="text-center text-gray-500 py-8">No data available yet.</p>
-                {% endfor %}
+                    {% if item.is_pass %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Pass</span>
+                    {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Fail</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Subject Wise Marks -->
+                <div class="bg-gray-50 rounded-xl p-3 grid grid-cols-2 gap-2 text-xs">
+                    {% for m in item.row_marks %}
+                        <div class="flex justify-between border-b border-gray-100 pb-1 last:border-b-0 last:pb-0">
+                            <span class="text-gray-500">{{ m.subject_name }}</span>
+                            {% if m.has_mark %}
+                                <span class="font-bold {% if m.is_pass %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {{ m.obtained|floatformat:0 }}
+                                </span>
+                            {% else %}
+                                <span class="text-gray-300">-</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Footer details: Total, Percent -->
+                <div class="flex justify-between items-center text-xs font-medium">
+                    <span class="text-gray-500">
+                        Total Score: <span class="font-bold text-gray-900">{{ item.total_obtained|floatformat:0 }}</span> / {{ item.total_max|floatformat:0 }}
+                    </span>
+                    <span class="font-bold text-brand-600">
+                        {{ item.percentage|floatformat:1 }}%
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-6 text-center text-sm text-gray-500">No exams have been graded yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+        
+        <!-- Performance Chart -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-brand-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                    </svg>
+                    Performance Overview
+                </h2>
+                
+                <!-- Chart Navigation Tabs -->
+                <div class="flex bg-gray-100 p-1 rounded-xl gap-1">
+                    <button onclick="switchChartTab('totals')" id="tab-totals" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-brand-600 shadow-sm cursor-pointer">
+                        Exam Totals
+                    </button>
+                    {% if subjects %}
+                    <button onclick="switchChartTab('subjectwise')" id="tab-subjectwise" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-900 cursor-pointer">
+                        Subject-wise
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Totals Chart Container -->
+            <div id="chart-container-totals" class="relative h-[300px] w-full block">
+                <canvas id="totalsChart"></canvas>
+            </div>
+
+            <!-- Subject-wise Chart Container -->
+            {% if subjects %}
+            <div id="chart-container-subjectwise" class="relative h-[300px] w-full hidden">
+                <canvas id="subjectwiseChart"></canvas>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Sidebar (Leaderboard & Upcoming Exams) -->
+        <div class="flex flex-col gap-8">
+            <!-- Leaderboard -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-[400px]">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clip-rule="evenodd" />
+                    </svg>
+                    Class Standings
+                </h2>
+                
+                <div class="flex-grow overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                    {% for entry in leaderboard %}
+                        <div class="flex items-center justify-between p-3 rounded-xl transition-all duration-200 
+                            {% if entry.is_current %}bg-brand-50 border border-brand-200 shadow-sm{% else %}bg-gray-50 border border-transparent hover:bg-gray-100{% endif %}">
+                            
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm
+                                    {% if entry.rank == 1 %}bg-yellow-100 text-yellow-700
+                                    {% elif entry.rank == 2 %}bg-gray-200 text-gray-700
+                                    {% elif entry.rank == 3 %}bg-orange-100 text-orange-700
+                                    {% else %}bg-white text-gray-500 shadow-sm{% endif %}">
+                                    #{{ entry.rank }}
+                                </div>
+                                <div>
+                                    <p class="font-medium {% if entry.is_current %}text-brand-900{% else %}text-gray-900{% endif %} text-sm">
+                                        {{ entry.student_name }}
+                                        {% if entry.is_current %}<span class="text-xs font-normal text-brand-600 ml-1">(You)</span>{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="text-right">
+                                <p class="font-bold {% if entry.is_current %}text-brand-700{% else %}text-gray-900{% endif %}">
+                                    {{ entry.total_marks|floatformat:0 }}
+                                </p>
+                                <p class="text-xs text-gray-500">/ {{ entry.total_max|floatformat:0 }}</p>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-center text-gray-500 py-8">No data available yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Upcoming Exams -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col border-l-4 border-blue-500">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                    </svg>
+                    വരാനിരിക്കുന്ന പരീക്ഷകൾ <span class="text-xs text-gray-400 font-normal ml-2">(Upcoming Exams)</span>
+                </h2>
+                
+                <div class="space-y-3">
+                    {% for exam in upcoming_exams %}
+                        <div class="p-3 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-blue-900">
+                                    {{ exam.name }}
+                                    {% if exam.subject %}
+                                        <span class="px-2 py-0.5 rounded text-[10px] bg-blue-100 text-blue-800 font-bold uppercase ml-1.5">
+                                            {{ exam.subject.name }}
+                                        </span>
+                                    {% endif %}
+                                </p>
+                                <p class="text-xs text-blue-600 font-medium mt-1">തീയതി: {{ exam.date|date:"d-m-Y" }}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800">
+                                    പരмаവധി: {{ exam.max_marks|floatformat:0 }}
+                                </span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-center text-gray-500 py-4 text-sm">വരാനിരിക്കുന്ന പരീക്ഷകൾ ഒന്നും നിശ്ചയിച്ചിട്ടില്ല.</p>
+                    {% endfor %}
+                </div>
             </div>
         </div>
         
@@ -103,52 +361,93 @@
 
 {% block scripts %}
 <script>
+    function switchChartTab(tab) {
+        const tabTotals = document.getElementById('tab-totals');
+        const tabSubjectwise = document.getElementById('tab-subjectwise');
+        const containerTotals = document.getElementById('chart-container-totals');
+        const containerSubjectwise = document.getElementById('chart-container-subjectwise');
+
+        if (tab === 'totals') {
+            tabTotals.classList.add('bg-white', 'text-brand-600', 'shadow-sm');
+            tabTotals.classList.remove('text-gray-500', 'hover:text-gray-900');
+            if (tabSubjectwise) {
+                tabSubjectwise.classList.remove('bg-white', 'text-brand-600', 'shadow-sm');
+                tabSubjectwise.classList.add('text-gray-500', 'hover:text-gray-900');
+            }
+            containerTotals.classList.remove('hidden');
+            containerTotals.classList.add('block');
+            if (containerSubjectwise) {
+                containerSubjectwise.classList.add('hidden');
+                containerSubjectwise.classList.remove('block');
+            }
+        } else {
+            if (tabSubjectwise) {
+                tabSubjectwise.classList.add('bg-white', 'text-brand-600', 'shadow-sm');
+                tabSubjectwise.classList.remove('text-gray-500', 'hover:text-gray-900');
+            }
+            tabTotals.classList.remove('bg-white', 'text-brand-600', 'shadow-sm');
+            tabTotals.classList.add('text-gray-500', 'hover:text-gray-900');
+            if (containerSubjectwise) {
+                containerSubjectwise.classList.remove('hidden');
+                containerSubjectwise.classList.add('block');
+            }
+            containerTotals.classList.add('hidden');
+            containerTotals.classList.remove('block');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        
-        const labels = {{ chart_labels|safe }};
-        const data = {{ chart_data|safe }};
-        
-        // Gradient for line chart
-        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(236, 72, 153, 0.5)'); // brand-500
-        gradient.addColorStop(1, 'rgba(236, 72, 153, 0.0)');
-        
-        new Chart(ctx, {
+        const chartMarks = {{ chart_marks_json|safe }};
+        const chartSubjects = {{ chart_subjects_json|safe }};
+
+        const labels = chartMarks.map(item => item.exam_name);
+
+        // 1. Totals Line Chart (smooth gradient fill)
+        const totalsCtx = document.getElementById('totalsChart').getContext('2d');
+        const totalsData = chartMarks.map(item => item.percentage);
+
+        const totalsGradient = totalsCtx.createLinearGradient(0, 0, 0, 300);
+        totalsGradient.addColorStop(0, 'rgba(219, 39, 119, 0.25)');
+        totalsGradient.addColorStop(1, 'rgba(219, 39, 119, 0.0)');
+
+        new Chart(totalsCtx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Score Percentage (%)',
-                    data: data,
-                    borderColor: '#db2777', // brand-600
-                    backgroundColor: gradient,
-                    borderWidth: 3,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#db2777',
+                    label: 'Overall Percentage',
+                    data: totalsData,
+                    borderColor: 'rgba(219, 39, 119, 1)',
+                    backgroundColor: totalsGradient,
+                    borderWidth: 2.5,
+                    pointBackgroundColor: 'rgba(219, 39, 119, 1)',
+                    pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     pointRadius: 5,
                     pointHoverRadius: 7,
-                    fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    fill: true
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
                         backgroundColor: 'rgba(17, 24, 39, 0.9)',
                         padding: 12,
-                        titleFont: { size: 14, family: 'Inter' },
-                        bodyFont: { size: 14, family: 'Inter' },
+                        titleFont: { size: 13, family: 'Inter', weight: 'bold' },
+                        bodyFont: { size: 13, family: 'Inter' },
                         displayColors: false,
                         callbacks: {
                             label: function(context) {
-                                return context.parsed.y + '%';
+                                const index = context.dataIndex;
+                                const item = chartMarks[index];
+                                return [
+                                    `Percentage: ${context.parsed.y.toFixed(1)}%`,
+                                    `Total Score: ${item.total_obtained} / ${item.total_max}`
+                                ];
                             }
                         }
                     }
@@ -157,32 +456,97 @@
                     y: {
                         beginAtZero: true,
                         max: 100,
-                        grid: {
-                            color: '#f1f5f9',
-                            drawBorder: false,
-                        },
-                        ticks: {
-                            font: { family: 'Inter' },
-                            color: '#64748b'
-                        }
+                        grid: { color: '#f1f5f9', drawBorder: false },
+                        ticks: { font: { family: 'Inter' }, color: '#64748b', callback: value => value + '%' }
                     },
                     x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false,
-                        },
-                        ticks: {
-                            font: { family: 'Inter' },
-                            color: '#64748b'
-                        }
+                        grid: { color: '#f8fafc', drawBorder: false },
+                        ticks: { font: { family: 'Inter' }, color: '#64748b' }
                     }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index',
-                },
+                }
             }
         });
+
+        // 2. Subject-wise Multi-Line Chart
+        if (chartSubjects.length > 0 && document.getElementById('subjectwiseChart')) {
+            const subjectwiseCtx = document.getElementById('subjectwiseChart').getContext('2d');
+
+            const colors = [
+                '#4f46e5', '#06b6d4', '#10b981',
+                '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6'
+            ];
+
+            const datasets = chartSubjects.map((subj, idx) => {
+                const color = colors[idx % colors.length];
+                const r = parseInt(color.slice(1,3), 16);
+                const g = parseInt(color.slice(3,5), 16);
+                const b = parseInt(color.slice(5,7), 16);
+                return {
+                    label: subj.name,
+                    data: chartMarks.map(item => {
+                        const val = item.subject_marks[subj.id];
+                        return val !== undefined ? val : null;
+                    }),
+                    borderColor: color,
+                    backgroundColor: `rgba(${r},${g},${b},0.08)`,
+                    borderWidth: 2.5,
+                    pointBackgroundColor: color,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.4,
+                    fill: false,
+                    spanGaps: true
+                };
+            });
+
+            new Chart(subjectwiseCtx, {
+                type: 'line',
+                data: { labels: labels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Inter', weight: 'bold', size: 11 },
+                                boxWidth: 12,
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                            padding: 12,
+                            titleFont: { size: 13, family: 'Inter', weight: 'bold' },
+                            bodyFont: { size: 13, family: 'Inter' },
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: ${context.parsed.y} Marks`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9', drawBorder: false },
+                            ticks: { font: { family: 'Inter' }, color: '#64748b' }
+                        },
+                        x: {
+                            grid: { color: '#f8fafc', drawBorder: false },
+                            ticks: { font: { family: 'Inter' }, color: '#64748b' }
+                        }
+                    }
+                }
+            });
+        }
     });
 </script>
 {% endblock %}
+
+

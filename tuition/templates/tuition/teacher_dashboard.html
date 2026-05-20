@@ -38,20 +38,52 @@
             {% for class_group in classes %}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full hover:shadow-md transition-shadow">
                     <h3 class="text-xl font-bold text-gray-900 mb-2">{{ class_group.name }}</h3>
-                    <p class="text-sm text-gray-500 mb-6 flex-grow">{{ class_group.students.count }} Enrolled Students</p>
+                    <div class="mb-6 flex-grow flex flex-col gap-1 justify-center">
+                        <p class="text-sm text-gray-500">{{ class_group.students.count }} Enrolled Students</p>
+                        {% if class_group.teacher %}
+                            <p class="text-xs text-gray-400">
+                                Primary Teacher: <span class="font-semibold text-purple-600">{{ class_group.teacher.first_name|default:class_group.teacher.username }}</span>
+                            </p>
+                        {% else %}
+                            <p class="text-xs text-gray-400 italic">No primary teacher assigned</p>
+                        {% endif %}
+                    </div>
                     
                     <div class="space-y-3">
-                        <a href="{% url 'mark_attendance' class_group.id %}" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none transition-colors">
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="{% url 'mark_attendance' class_group.id %}" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                Daily
+                            </a>
+                            <a href="{% url 'monthly_attendance' class_group.id %}" class="w-full flex items-center justify-center px-4 py-2 border border-purple-200 rounded-xl shadow-sm text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 focus:outline-none transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                                Monthly
+                            </a>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="{% url 'enter_marks' class_group.id %}" class="w-full flex items-center justify-center px-4 py-2 border border-purple-200 rounded-xl shadow-sm text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 focus:outline-none transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                                Edit Marks
+                            </a>
+                            <a href="{% url 'view_marks' class_group.id %}" class="w-full flex items-center justify-center px-4 py-2 border border-gray-200 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                  <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                                </svg>
+                                View Marks
+                            </a>
+                        </div>
+                        <a href="{% url 'manage_tasks' class_group.id %}" class="w-full flex items-center justify-center px-4 py-2 border border-purple-200 rounded-xl shadow-sm text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 focus:outline-none transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                              <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z" clip-rule="evenodd" />
                             </svg>
-                            Mark Attendance
-                        </a>
-                        <a href="{% url 'enter_marks' class_group.id %}" class="w-full flex items-center justify-center px-4 py-2 border border-purple-200 rounded-xl shadow-sm text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 focus:outline-none transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                            Enter Marks
+                            Home Tasks / Work
                         </a>
                     </div>
                 </div>

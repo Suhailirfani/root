@@ -23,7 +23,19 @@
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Class Name</label>
                     <input type="text" id="name" name="name" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-base sm:text-sm px-3 py-3 md:py-2" placeholder="e.g. Class 10 Science">
                 </div>
-                <button type="submit" class="w-full flex justify-center py-3 md:py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                
+                {% if not active_centre %}
+                <div>
+                    <label for="centre_id" class="block text-sm font-medium text-gray-700 mb-1">Centre</label>
+                    <select id="centre_id" name="centre_id" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-base sm:text-sm px-3 py-3 md:py-2">
+                        {% for c in all_centres %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <button type="submit" class="w-full flex justify-center py-3 md:py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 cursor-pointer">
                     Create Class
                 </button>
             </form>
@@ -36,20 +48,33 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class Name</th>
+                        {% if not active_centre %}
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Centre</th>
+                        {% endif %}
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subjects</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Students</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exams</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for cls in classes %}
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ cls.name }}</td>
+                        {% if not active_centre %}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cls.centre.name }}</td>
+                        {% endif %}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cls.subjects.count }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cls.students.count }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cls.exams.count }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                            <a href="{% url 'admin_subjects' cls.id %}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-lg transition-colors">Subjects</a>
+                            <a href="{% url 'view_marks' cls.id %}" class="text-brand-600 hover:text-brand-900 bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded-lg transition-colors">View Marks</a>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No classes found.</td>
+                        <td colspan="{% if not active_centre %}6{% else %}5{% endif %}" class="px-6 py-4 text-center text-sm text-gray-500">No classes found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -58,17 +83,29 @@
             <!-- Mobile Card View -->
             <div class="md:hidden divide-y divide-gray-100">
                 {% for cls in classes %}
-                <div class="p-4 hover:bg-gray-50 flex justify-between items-center">
-                    <p class="text-sm font-bold text-gray-900">{{ cls.name }}</p>
-                    <div class="flex gap-3 text-xs text-gray-500">
-                        <span class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-4 hover:bg-gray-50 flex flex-col gap-3">
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm font-bold text-gray-900">{{ cls.name }}</p>
+                        <div class="flex gap-2">
+                            <a href="{% url 'admin_subjects' cls.id %}" class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">Subjects</a>
+                            <a href="{% url 'view_marks' cls.id %}" class="text-xs font-medium text-brand-600 bg-brand-50 px-2.5 py-1 rounded-lg">View Marks</a>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 text-xs text-gray-500">
+                        <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md" title="Subjects">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            {{ cls.subjects.count }}
+                        </span>
+                        <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md" title="Students">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                             {{ cls.students.count }}
                         </span>
-                        <span class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md" title="Exams">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                             </svg>
                             {{ cls.exams.count }}

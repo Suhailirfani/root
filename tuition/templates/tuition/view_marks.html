@@ -1,0 +1,130 @@
+{% extends 'tuition/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Mark List</h1>
+            <p class="text-gray-500">{{ class_group.name }}</p>
+        </div>
+        <div>
+            <a href="javascript:history.back()" class="text-sm font-medium text-brand-600 hover:text-brand-500 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Go Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Exam/Subject Selector -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <form method="GET" action="{% url 'view_marks' class_group.id %}" class="flex flex-col sm:flex-row gap-4 items-end">
+            <div class="flex-grow w-full">
+                <label for="exam_id" class="block text-sm font-medium text-gray-700 mb-1">Select Exam</label>
+                <select id="exam_id" name="exam_id" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-base sm:text-sm px-3 py-3 md:py-2">
+                    <option value="" disabled {% if not selected_exam %}selected{% endif %}>-- Select an Exam --</option>
+                    {% for exam in exams %}
+                        <option value="{{ exam.id }}" {% if selected_exam.id == exam.id %}selected{% endif %}>{{ exam.name }} ({{ exam.date }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if subjects %}
+            <div class="flex-grow w-full">
+                <label for="subject_id" class="block text-sm font-medium text-gray-700 mb-1">Select Subject</label>
+                {% if selected_exam and selected_exam.subject %}
+                    <div class="block w-full rounded-lg border border-gray-200 bg-gray-100 py-3 px-3 md:py-2 text-base text-gray-600 sm:text-sm shadow-sm flex items-center justify-between">
+                        <span class="font-medium text-gray-900">{{ selected_exam.subject.name }}</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] bg-purple-100 text-purple-800 font-semibold uppercase">Linked to Exam</span>
+                    </div>
+                    <input type="hidden" name="subject_id" value="{{ selected_exam.subject.id }}">
+                {% else %}
+                    <select id="subject_id" name="subject_id" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-base sm:text-sm px-3 py-3 md:py-2">
+                        <option value="" disabled {% if not selected_subject %}selected{% endif %}>-- Select a Subject --</option>
+                        {% for subject in subjects %}
+                            <option value="{{ subject.id }}" {% if selected_subject.id == subject.id %}selected{% endif %}>{{ subject.name }}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+            </div>
+            {% endif %}
+            <button type="submit" class="w-full sm:w-auto flex justify-center py-3 md:py-2 px-6 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                View Marks
+            </button>
+        </form>
+    </div>
+
+    {% if show_marks %}
+    <!-- Mark List Table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+            <h2 class="text-lg font-bold text-gray-900">Results: {{ selected_exam.name }} {% if selected_subject %}({{ selected_subject.name }}){% endif %}</h2>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-800">
+                Max Marks: {{ selected_exam.max_marks|floatformat:0 }}
+            </span>
+        </div>
+
+        {% if mark_entries %}
+            <!-- Desktop Table View -->
+            <table class="min-w-full divide-y divide-gray-200 hidden md:table">
+                <thead class="bg-white">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marks Obtained</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentage</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for entry in mark_entries %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full {% if entry.rank == 1 %}bg-yellow-100 text-yellow-800 font-bold{% elif entry.rank == 2 %}bg-gray-200 text-gray-800 font-bold{% elif entry.rank == 3 %}bg-orange-100 text-orange-800 font-bold{% else %}bg-gray-100 text-gray-600{% endif %}">
+                                {{ entry.rank }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ entry.student.full_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold {% if entry.marks_obtained >= selected_exam.passing_marks %}text-green-600{% else %}text-red-600{% endif %}">
+                            {{ entry.marks_obtained|floatformat:0 }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ entry.percentage|floatformat:1 }}%
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Mobile Card View -->
+            <div class="md:hidden divide-y divide-gray-100">
+                {% for entry in mark_entries %}
+                <div class="p-4 flex justify-between items-center hover:bg-gray-50">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-full text-sm {% if entry.rank == 1 %}bg-yellow-100 text-yellow-800 font-bold{% elif entry.rank == 2 %}bg-gray-200 text-gray-800 font-bold{% elif entry.rank == 3 %}bg-orange-100 text-orange-800 font-bold{% else %}bg-gray-100 text-gray-600{% endif %}">
+                            {{ entry.rank }}
+                        </span>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900">{{ entry.student.full_name }}</p>
+                            <p class="text-xs text-gray-500">{{ entry.percentage|floatformat:1 }}%</p>
+                        </div>
+                    </div>
+                    <div class="text-right font-bold {% if entry.marks_obtained >= selected_exam.passing_marks %}text-green-600{% else %}text-red-600{% endif %}">
+                        {{ entry.marks_obtained|floatformat:0 }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="p-12 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <h3 class="text-lg font-medium text-gray-900">No marks entered</h3>
+                <p class="text-sm text-gray-500 mt-1">No results found for the selected exam.</p>
+            </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

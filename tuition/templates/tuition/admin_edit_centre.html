@@ -1,0 +1,69 @@
+{% extends 'tuition/base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <!-- Accent Banner -->
+        <div class="h-1.5 bg-gradient-to-r from-brand-500 to-indigo-500"></div>
+
+        <div class="p-6 sm:p-8">
+            <div class="flex items-center justify-between gap-4 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 text-sm text-brand-600 font-bold mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Administration Portal
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">Edit Centre Details</h1>
+                </div>
+                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 uppercase">
+                    {{ centre.code }}
+                </span>
+            </div>
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="name" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Centre Name</label>
+                    <input type="text" name="name" id="name" required value="{{ centre.name }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                </div>
+                
+                <div>
+                    <label for="code" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Centre Code</label>
+                    <input type="text" name="code" id="code" required value="{{ centre.code }}" maxlength="20"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all uppercase">
+                </div>
+                
+                <div>
+                    <label for="contact_number" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Contact Number</label>
+                    <input type="text" name="contact_number" id="contact_number" value="{{ centre.contact_number }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                </div>
+                
+                <div>
+                    <label for="address" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Address</label>
+                    <textarea name="address" id="address" rows="4"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none">{{ centre.address }}</textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-4 border-t border-gray-50 pt-6">
+                    <a href="{% url 'admin_centres' %}" class="px-5 py-3 border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-bold transition-all">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition-all duration-200 shadow-sm flex items-center gap-2 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

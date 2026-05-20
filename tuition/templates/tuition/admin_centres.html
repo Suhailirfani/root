@@ -1,0 +1,166 @@
+{% extends 'tuition/base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <div>
+            <div class="flex items-center gap-2 text-sm text-brand-600 font-bold mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Administration Portal
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Manage Centres</h1>
+            <p class="text-gray-500 text-sm">Add, update, or remove physical branch locations for ROOT Tuition.</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold transition-all duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            Dashboard
+        </a>
+    </div>
+
+    <!-- Main Grid: Form Left, Centre Cards Right -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Add Centre Form -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit">
+            <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Add New Centre
+            </h2>
+            
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="name" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Centre Name</label>
+                    <input type="text" name="name" id="name" required placeholder="e.g. Town Branch"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                </div>
+                
+                <div>
+                    <label for="code" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Centre Code</label>
+                    <input type="text" name="code" id="code" required placeholder="e.g. TCNTR" maxlength="20"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all uppercase">
+                </div>
+                
+                <div>
+                    <label for="contact_number" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Contact Number</label>
+                    <input type="text" name="contact_number" id="contact_number" placeholder="e.g. +91 98765 43210"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                </div>
+                
+                <div>
+                    <label for="address" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Address</label>
+                    <textarea name="address" id="address" rows="3" placeholder="Enter physical location address"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
+                </div>
+                
+                <button type="submit" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition-all duration-200 shadow-sm flex items-center justify-center gap-2 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Create Centre
+                </button>
+            </form>
+        </div>
+
+        <!-- Centre Cards Listing -->
+        <div class="lg:col-span-2 space-y-6">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                </svg>
+                Active Centres ({{ centres|length }})
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for centre in centres %}
+                    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
+                        <!-- Top Accent Banner -->
+                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-brand-500 to-indigo-500"></div>
+                        
+                        <div>
+                            <!-- Title & Code Badge -->
+                            <div class="flex justify-between items-start gap-4 mb-4">
+                                <div>
+                                    <h3 class="font-bold text-gray-900 group-hover:text-brand-600 transition-colors">{{ centre.name }}</h3>
+                                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded text-xs font-bold bg-indigo-50 text-indigo-700">
+                                        {{ centre.code }}
+                                    </span>
+                                </div>
+                                
+                                <div class="flex items-center gap-2">
+                                    <a href="{% url 'admin_edit_centre' centre.id %}" class="p-2 hover:bg-gray-50 text-gray-500 hover:text-brand-600 rounded-lg transition-colors" title="Edit Centre">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </a>
+                                    
+                                    <form method="POST" action="{% url 'admin_delete_centre' centre.id %}" class="inline" onsubmit="return confirm('Are you sure you want to delete this centre? All classes under this centre will also be deleted!');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="p-2 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-lg transition-colors cursor-pointer" title="Delete Centre">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Address & Contact Info -->
+                            <div class="space-y-2.5 text-xs text-gray-500 border-t border-gray-50 pt-4 mb-6">
+                                {% if centre.contact_number %}
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                        {{ centre.contact_number }}
+                                    </div>
+                                {% endif %}
+                                
+                                {% if centre.address %}
+                                    <div class="flex items-start gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <span>{{ centre.address }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Statistics Badges -->
+                        <div class="grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Students</p>
+                                <p class="text-lg font-bold text-gray-900 mt-0.5">{{ centre.student_count }}</p>
+                            </div>
+                            <div class="border-l border-gray-200">
+                                <p class="text-xs text-gray-500 font-medium">Staff Members</p>
+                                <p class="text-lg font-bold text-gray-900 mt-0.5">{{ centre.staff_count }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-span-2 bg-white rounded-2xl border border-dashed border-gray-200 py-16 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <p class="text-gray-500 font-medium">No centres added yet.</p>
+                        <p class="text-gray-400 text-xs mt-1">Use the form on the left to initialize a location.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+    </div>
+
+</div>
+{% endblock %}

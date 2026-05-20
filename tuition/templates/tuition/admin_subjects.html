@@ -1,0 +1,85 @@
+{% extends 'tuition/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Manage Subjects</h1>
+            <p class="text-gray-500">Subjects for class: <span class="font-semibold text-brand-600">{{ class_group.name }}</span></p>
+        </div>
+        <a href="{% url 'admin_classes' %}" class="text-sm font-medium text-brand-600 hover:text-brand-500 flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Classes
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Add Subject Form -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Add New Subject</h2>
+            <form method="POST" action="{% url 'admin_subjects' class_group.id %}" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Subject Name</label>
+                    <input type="text" id="name" name="name" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-base sm:text-sm px-3 py-3 md:py-2" placeholder="e.g. Physics, Biology">
+                </div>
+                <button type="submit" class="w-full flex justify-center py-3 md:py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                    Add Subject
+                </button>
+            </form>
+        </div>
+
+        <!-- Subject List -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <!-- Desktop Table View -->
+            <table class="min-w-full divide-y divide-gray-200 hidden md:table">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject Name</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for subject in subjects %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ subject.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                            <a href="{% url 'admin_edit_subject' subject.id %}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-lg transition-colors">Edit</a>
+                            <form action="{% url 'admin_delete_subject' subject.id %}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this subject? This will delete all associated marks.');">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-colors cursor-pointer">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="px-6 py-8 text-center text-sm text-gray-500">No subjects added to this class yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Mobile Card View -->
+            <div class="md:hidden divide-y divide-gray-100">
+                {% for subject in subjects %}
+                <div class="p-4 hover:bg-gray-50 flex justify-between items-center gap-3">
+                    <p class="text-sm font-bold text-gray-900">{{ subject.name }}</p>
+                    <div class="flex gap-2">
+                        <a href="{% url 'admin_edit_subject' subject.id %}" class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">Edit</a>
+                        <form action="{% url 'admin_delete_subject' subject.id %}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this subject? This will delete all associated marks.');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-xs font-medium text-red-600 bg-red-50 px-2.5 py-1 rounded-lg cursor-pointer">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-6 text-center text-sm text-gray-500">No subjects added to this class yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
