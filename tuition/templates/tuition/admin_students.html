@@ -6,7 +6,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Manage Students</h1>
-            <p class="text-gray-500">Enroll new students</p>
+            <p class="text-gray-500">Enroll new students and manage by class</p>
         </div>
         <a href="{% url 'admin_dashboard' %}" class="text-sm font-medium text-brand-600 hover:text-brand-500">
             Back to Dashboard
@@ -72,94 +72,89 @@
             </div>
         </div>
 
-        <!-- Student List -->
-        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden h-[600px] overflow-y-auto custom-scrollbar relative">
-            <form method="POST" action="{% url 'admin_bulk_delete_students' %}" id="bulk-delete-form">
-                {% csrf_token %}
-                
-                <!-- Bulk Delete Action Bar -->
-                <div id="bulk-actions-bar" class="hidden bg-red-50 border-b border-red-100 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
-                    <span class="text-sm font-semibold text-red-800">
-                        <span id="selected-count">0</span> student(s) selected
-                    </span>
-                    <button type="submit" onclick="return confirm('Are you sure you want to delete the selected students? This will permanently delete their attendances and mark entries.');" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Delete Selected
-                    </button>
+        <!-- Student List — Class-wise -->
+        <div class="lg:col-span-2 space-y-6">
+            {% for group in class_groups %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <!-- Class Header -->
+                <div class="flex items-center justify-between px-6 py-4 bg-gray-50 border-b border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-100 text-brand-700 font-bold text-sm">
+                            {{ group.students|length }}
+                        </span>
+                        <h2 class="text-base font-bold text-gray-900">{{ group.class.name }}</h2>
+                        {% if not active_centre %}
+                        <span class="px-2 py-0.5 rounded text-xs bg-indigo-50 text-indigo-700 font-medium">{{ group.class.centre.name }}</span>
+                        {% endif %}
+                    </div>
+                    <!-- Bulk delete form for this class -->
+                    <form method="POST" action="{% url 'admin_bulk_delete_students' %}" id="bulk-delete-form-{{ group.class.id }}">
+                        {% csrf_token %}
+                        {% for s in group.students %}
+                        <input type="hidden" name="selected_students" value="{{ s.id }}" class="bulk-hidden-{{ group.class.id }}">
+                        {% endfor %}
+                        <button type="button" onclick="confirmDeleteClass({{ group.class.id }}, '{{ group.class.name }}')"
+                            class="text-xs text-red-500 hover:text-red-700 font-medium transition-colors cursor-pointer">
+                            Delete All
+                        </button>
+                    </form>
                 </div>
 
-                <!-- Desktop Table View -->
-                <table class="min-w-full divide-y divide-gray-200 hidden md:table">
-                    <thead class="bg-gray-50 sticky top-0">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
-                                <input type="checkbox" id="select-all-checkbox" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer">
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
-                            {% if not active_centre %}
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Centre</th>
-                            {% endif %}
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PIN</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                {% if group.students %}
+                <!-- Desktop Table -->
+                <table class="min-w-full divide-y divide-gray-100 hidden md:table">
+                    <thead>
+                        <tr class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left w-10">#</th>
+                            <th class="px-6 py-3 text-left">Student ID</th>
+                            <th class="px-6 py-3 text-left">Name</th>
+                            <th class="px-6 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for s in students %}
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 w-10">
-                                <input type="checkbox" name="selected_students" value="{{ s.id }}" class="student-checkbox rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer">
+                    <tbody class="divide-y divide-gray-50">
+                        {% for s in group.students %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3 text-sm text-gray-400">{{ forloop.counter }}</td>
+                            <td class="px-6 py-3 text-sm font-mono text-gray-600">{{ s.student_id }}</td>
+                            <td class="px-6 py-3">
+                                <a href="{% url 'admin_student_detail' s.id %}"
+                                   class="text-sm font-semibold text-brand-700 hover:text-brand-900 hover:underline transition-colors">
+                                    {{ s.full_name }}
+                                </a>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ s.student_id }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ s.full_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ s.class_group.name }}</td>
-                            {% if not active_centre %}
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <span class="px-2 py-0.5 rounded text-xs bg-indigo-50 text-indigo-700 font-medium">
-                                    {{ s.class_group.centre.name }}
-                                </span>
-                            </td>
-                            {% endif %}
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{{ s.pin }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{% url 'admin_edit_student' s.id %}" class="text-brand-600 hover:text-brand-900 mr-3">Edit</a>
-                                <form method="POST" action="{% url 'admin_delete_student' s.id %}" class="inline" onsubmit="return confirm('Are you sure you want to delete this student? This will permanently delete their attendances and mark entries.');">
+                            <td class="px-6 py-3 text-right">
+                                <a href="{% url 'admin_edit_student' s.id %}"
+                                   class="inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-900 mr-3 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                    Edit
+                                </a>
+                                <form method="POST" action="{% url 'admin_delete_student' s.id %}" class="inline"
+                                      onsubmit="return confirm('Delete {{ s.full_name }}? This will permanently remove their attendance and marks.');">
                                     {% csrf_token %}
-                                    <button type="submit" class="text-red-600 hover:text-red-900 cursor-pointer">Delete</button>
+                                    <button type="submit"
+                                            class="inline-flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-800 transition-colors cursor-pointer">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        Delete
+                                    </button>
                                 </form>
                             </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="{% if not active_centre %}7{% else %}6{% endif %}" class="px-6 py-4 text-center text-sm text-gray-500">No students enrolled.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
 
                 <!-- Mobile Card View -->
-                <div class="md:hidden divide-y divide-gray-100">
-                    {% for s in students %}
-                    <div class="p-4 hover:bg-gray-50 flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" name="selected_students" value="{{ s.id }}" class="student-checkbox rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer">
-                            <div>
-                                <p class="text-sm font-bold text-gray-900">{{ s.full_name }}</p>
-                                <p class="text-xs text-gray-500 mt-1">ID: {{ s.student_id }} &bull; Class: {{ s.class_group.name }}</p>
-                                {% if not active_centre %}
-                                <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] bg-indigo-50 text-indigo-700 font-bold uppercase">
-                                    {{ s.class_group.centre.name }}
-                                </span>
-                                {% endif %}
-                                <div class="mt-2">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-brand-100 text-brand-800 font-mono tracking-widest">
-                                        PIN: {{ s.pin }}
-                                    </span>
-                                </div>
-                            </div>
+                <div class="md:hidden divide-y divide-gray-50">
+                    {% for s in group.students %}
+                    <div class="px-4 py-3 flex justify-between items-center hover:bg-gray-50">
+                        <div>
+                            <a href="{% url 'admin_student_detail' s.id %}"
+                               class="text-sm font-bold text-brand-700 hover:underline">{{ s.full_name }}</a>
+                            <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ s.student_id }}</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <a href="{% url 'admin_edit_student' s.id %}" class="p-2 text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
@@ -167,9 +162,10 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                 </svg>
                             </a>
-                            <form method="POST" action="{% url 'admin_delete_student' s.id %}" class="inline" onsubmit="return confirm('Are you sure you want to delete this student? This will permanently delete their attendances and mark entries.');">
+                            <form method="POST" action="{% url 'admin_delete_student' s.id %}" class="inline"
+                                  onsubmit="return confirm('Delete {{ s.full_name }}? This will permanently remove their attendance and marks.');">
                                 {% csrf_token %}
-                                <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer">
+                                <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -177,57 +173,27 @@
                             </form>
                         </div>
                     </div>
-                    {% empty %}
-                    <div class="p-6 text-center text-sm text-gray-500">No students enrolled.</div>
                     {% endfor %}
                 </div>
-            </form>
+
+                {% else %}
+                <div class="px-6 py-8 text-center text-sm text-gray-400">No students in this class.</div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-12 text-center text-gray-400">
+                No classes found. Please create a class first.
+            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const checkboxes = document.querySelectorAll('.student-checkbox');
-        const selectAllCheckbox = document.getElementById('select-all-checkbox');
-        const bulkActionsBar = document.getElementById('bulk-actions-bar');
-        const selectedCountSpan = document.getElementById('selected-count');
-
-        function updateBulkActions() {
-            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-            selectedCountSpan.textContent = checkedCount;
-            if (checkedCount > 0) {
-                bulkActionsBar.classList.remove('hidden');
-                bulkActionsBar.classList.add('flex');
-            } else {
-                bulkActionsBar.classList.add('hidden');
-                bulkActionsBar.classList.remove('flex');
-            }
-            
-            if (selectAllCheckbox) {
-                selectAllCheckbox.checked = checkedCount === checkboxes.length && checkboxes.length > 0;
-            }
-        }
-
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', updateBulkActions);
-        });
-
-        if (selectAllCheckbox) {
-            selectAllCheckbox.addEventListener('change', function() {
-                checkboxes.forEach(cb => {
-                    cb.checked = selectAllCheckbox.checked;
-                });
-                updateBulkActions();
-            });
-        }
-    });
+function confirmDeleteClass(classId, className) {
+    if (confirm('Delete ALL students in ' + className + '? This cannot be undone.')) {
+        document.getElementById('bulk-delete-form-' + classId).submit();
+    }
+}
 </script>
-
-<style>
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-</style>
 {% endblock %}

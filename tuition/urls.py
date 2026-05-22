@@ -26,6 +26,7 @@ urlpatterns = [
     path('portal/students/', views.admin_students_view, name='admin_students'),
     path('portal/students/<int:student_id>/edit/', views.admin_edit_student_view, name='admin_edit_student'),
     path('portal/students/<int:student_id>/delete/', views.admin_delete_student_view, name='admin_delete_student'),
+    path('portal/students/<int:student_id>/detail/', views.admin_student_detail_view, name='admin_student_detail'),
     path('portal/students/bulk-delete/', views.admin_bulk_delete_students_view, name='admin_bulk_delete_students'),
     path('portal/students/bulk/', views.admin_bulk_students_view, name='admin_bulk_students'),
     path('portal/teachers/', views.admin_teachers_view, name='admin_teachers'),

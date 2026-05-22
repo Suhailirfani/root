@@ -753,14 +753,40 @@ def admin_students_view(request):
         else:
             messages.error(request, 'Please fill in all required fields.')
         return redirect('admin_students')
-        
+
     if active_centre:
-        students = Student.objects.filter(class_group__centre=active_centre)
-        classes = ClassGroup.objects.filter(centre=active_centre)
+        classes = ClassGroup.objects.filter(centre=active_centre).prefetch_related('students')
     else:
-        students = Student.objects.all()
-        classes = ClassGroup.objects.all()
-    return render(request, 'tuition/admin_students.html', {'students': students, 'classes': classes, 'active_centre': active_centre})
+        classes = ClassGroup.objects.all().prefetch_related('students')
+
+    # Build class-wise student groups
+    class_groups = []
+    for cls in classes:
+        class_students = cls.students.all().order_by('student_id')
+        class_groups.append({'class': cls, 'students': class_students})
+
+    all_classes = classes
+    return render(request, 'tuition/admin_students.html', {
+        'class_groups': class_groups,
+        'classes': all_classes,
+        'active_centre': active_centre,
+    })
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_student_detail_view(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    active_centre = get_admin_centre(request)
+
+    if active_centre and student.class_group.centre != active_centre:
+        messages.error(request, 'You do not have permission to view this student.')
+        return redirect('admin_students')
+
+    return render(request, 'tuition/admin_student_detail.html', {
+        'student': student,
+        'active_centre': active_centre,
+    })
 
 
 @login_required
