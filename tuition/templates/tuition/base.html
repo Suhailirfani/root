@@ -112,10 +112,11 @@
 
                         {% if request.user.is_superuser or request.user.profile.role == 'admin' %}
                             <a href="{% url 'admin_dashboard' %}" class="text-brand-600 hover:text-brand-500 px-3 py-3 md:py-2 rounded-md text-base md:text-sm font-medium transition-colors">Dashboard</a>
+                            <a href="{% url 'admin_logout' %}" class="text-gray-500 hover:text-gray-900 px-3 py-3 md:py-2 rounded-md text-base md:text-sm font-medium transition-colors">Logout ({{ request.user.username }})</a>
                         {% else %}
                             <a href="{% url 'teacher_dashboard' %}" class="text-brand-600 hover:text-brand-500 px-3 py-3 md:py-2 rounded-md text-base md:text-sm font-medium transition-colors">Dashboard</a>
+                            <a href="{% url 'teacher_logout' %}" class="text-gray-500 hover:text-gray-900 px-3 py-3 md:py-2 rounded-md text-base md:text-sm font-medium transition-colors">Logout ({{ request.user.username }})</a>
                         {% endif %}
-                        <a href="{% url 'teacher_logout' %}" class="text-gray-500 hover:text-gray-900 px-3 py-3 md:py-2 rounded-md text-base md:text-sm font-medium transition-colors">Logout ({{ request.user.username }})</a>
                     {% endif %}
                 </div>
             </div>

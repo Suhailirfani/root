@@ -171,3 +171,19 @@ class HomeTask(models.Model):
         subject_name = f" ({self.subject.name})" if self.subject else ""
         return f"{self.title}{subject_name} - {self.class_group.name} ({self.date})"
 
+
+class HomeTaskCompletion(models.Model):
+    """Tracks a parent marking a HomeTask as completed and teacher verification."""
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='task_completions')
+    task = models.ForeignKey(HomeTask, on_delete=models.CASCADE, related_name='completions')
+    completed_at = models.DateTimeField(auto_now_add=True)
+    verified = models.BooleanField(default=False)
+    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='verified_completions')
+    verified_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = [['student', 'task']]
+        ordering = ['-completed_at']
+
+    def __str__(self):
+        return f"{self.student} - {self.task.title} - Completed at {self.completed_at}"

@@ -14,8 +14,13 @@ urlpatterns = [
     path('teacher/class/<int:class_id>/monthly_attendance/', views.monthly_attendance_view, name='monthly_attendance'),
     path('teacher/class/<int:class_id>/marks/', views.enter_marks_view, name='enter_marks'),
     path('teacher/class/<int:class_id>/tasks/', views.manage_tasks_view, name='manage_tasks'),
+    path('parent/task/<int:task_id>/complete/', views.parent_complete_task, name='parent_complete_task'),
+    path('parent/task/<int:completion_id>/delete/', views.parent_delete_completion, name='parent_delete_completion'),
+    path('teacher/completion/<int:completion_id>/verify/', views.teacher_verify_completion, name='teacher_verify_completion'),
     path('teacher/task/<int:task_id>/delete/', views.delete_task_view, name='delete_task'),
     
+    path('portal/login/', views.admin_login_view, name='admin_login'),
+    path('portal/logout/', views.admin_logout_view, name='admin_logout'),
     path('portal/dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
     path('portal/working-days/', views.admin_working_days_view, name='admin_working_days'),
     path('portal/classes/', views.admin_classes_view, name='admin_classes'),

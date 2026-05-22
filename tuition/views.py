@@ -5,7 +5,7 @@ from django.db.models.functions import Rank
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
-from .models import Student, Attendance, Exam, MarkEntry, ClassGroup, UserProfile, Subject, Centre, HomeTask, WorkingDay
+from .models import Student, Attendance, Exam, MarkEntry, ClassGroup, UserProfile, Subject, Centre, HomeTask, WorkingDay, HomeTaskCompletion
 from django.contrib.auth.models import User
 import csv
 import random
@@ -35,7 +35,7 @@ def parent_login_view(request):
 def parent_logout_view(request):
     if 'logged_in_student' in request.session:
         del request.session['logged_in_student']
-    return redirect('parent_login')
+    return redirect('landing_page')
 
 def parent_dashboard_view(request):
     student_id = request.session.get('logged_in_student')
@@ -96,6 +96,9 @@ def parent_dashboard_view(request):
     today = timezone.now().date()
     upcoming_exams = Exam.objects.filter(class_group=class_group, date__gte=today).order_by('date')[:5]
     today_tasks = HomeTask.objects.filter(class_group=class_group, date=today).order_by('-created_at')
+    # Attach each task's completion for current student
+    for task in today_tasks:
+        task.completion = HomeTaskCompletion.objects.filter(task=task, student=student).first()
 
     # 5. Matrix Marks Grid (Detailed Mark List)
     subjects = class_group.subjects.all().order_by('name')
@@ -194,6 +197,53 @@ def parent_dashboard_view(request):
     }
     return render(request, 'tuition/parent_dashboard.html', context)
 
+# --- Homework Completion Views ---
+
+from django.contrib import messages
+from django.utils import timezone
+
+def parent_complete_task(request, task_id):
+    """Allow a parent to mark a HomeTask as completed for their child."""
+    student_id = request.session.get('logged_in_student')
+    if not student_id:
+        return redirect('parent_login')
+    student = get_object_or_404(Student, id=student_id)
+    task = get_object_or_404(HomeTask, id=task_id, class_group=student.class_group)
+    # Create completion if not exists
+    completion, created = HomeTaskCompletion.objects.get_or_create(student=student, task=task)
+    if created:
+        messages.success(request, "Home task marked as completed.")
+    else:
+        messages.info(request, "Home task was already marked as completed.")
+    return redirect('parent_dashboard')
+
+def parent_delete_completion(request, completion_id):
+    """Allow a parent to delete their completion (editability)."""
+    student_id = request.session.get('logged_in_student')
+    if not student_id:
+        return redirect('parent_login')
+    student = get_object_or_404(Student, id=student_id)
+    completion = get_object_or_404(HomeTaskCompletion, id=completion_id, student=student)
+    completion.delete()
+    messages.success(request, "Home task completion removed. You can re-mark it if needed.")
+    return redirect('parent_dashboard')
+
+def teacher_verify_completion(request, completion_id):
+    """Allow a teacher to verify a student's task completion."""
+    if not hasattr(request.user, 'profile') or request.user.profile.role != 'teacher':
+        messages.error(request, "Only teachers can verify completions.")
+        return redirect('teacher_dashboard')
+    completion = get_object_or_404(HomeTaskCompletion, id=completion_id)
+    completion.verified = True
+    completion.verified_by = request.user
+    completion.verified_at = timezone.now()
+    completion.save()
+    messages.success(request, "Completion verified.")
+    # Redirect back to the task management page for the class
+    class_id = completion.task.class_group.id
+    return redirect('manage_tasks', class_id=class_id)
+
+
 
 # --- Teacher / Admin Views ---
 
@@ -203,10 +253,11 @@ def teacher_login_view(request):
         p = request.POST.get('password')
         user = authenticate(request, username=u, password=p)
         if user is not None:
-            login(request, user)
-            if user.is_superuser or (hasattr(user, 'profile') and user.profile.role == 'admin'):
-                return redirect('admin_dashboard')
-            return redirect('teacher_dashboard')
+            if hasattr(user, 'profile') and user.profile.role == 'teacher':
+                login(request, user)
+                return redirect('teacher_dashboard')
+            else:
+                messages.error(request, 'Access Denied. Teacher account required.')
         else:
             messages.error(request, 'Invalid Username or Password.')
     return render(request, 'tuition/teacher_login.html')
@@ -214,7 +265,27 @@ def teacher_login_view(request):
 @login_required
 def teacher_logout_view(request):
     logout(request)
-    return redirect('teacher_login')
+    return redirect('landing_page')
+
+def admin_login_view(request):
+    if request.method == 'POST':
+        u = request.POST.get('username')
+        p = request.POST.get('password')
+        user = authenticate(request, username=u, password=p)
+        if user is not None:
+            if user.is_superuser or (hasattr(user, 'profile') and user.profile.role == 'admin'):
+                login(request, user)
+                return redirect('admin_dashboard')
+            else:
+                messages.error(request, 'Access Denied. Admin account required.')
+        else:
+            messages.error(request, 'Invalid Username or Password.')
+    return render(request, 'tuition/admin_login.html')
+
+@login_required
+def admin_logout_view(request):
+    logout(request)
+    return redirect('landing_page')
 
 @login_required
 def teacher_dashboard_view(request):
@@ -480,6 +551,9 @@ def manage_tasks_view(request, class_id):
     subjects = class_group.subjects.all()
     tasks = class_group.tasks.all().order_by('-date', '-created_at')
     
+    for task in tasks:
+        task.all_completions = task.completions.all().select_related('student', 'verified_by')
+
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
         description = request.POST.get('description', '').strip()

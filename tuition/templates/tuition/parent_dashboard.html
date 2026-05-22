@@ -88,6 +88,27 @@
                             <p class="text-xs font-semibold text-gray-600">{{ task.created_by.first_name|default:task.created_by.username }}</p>
                         </div>
                     {% endif %}
+                    {% if task.completion %}
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="text-green-600 font-bold">✅ പൂർത്തിയായത്</span>
+                            <span class="text-xs text-gray-500">{{ task.completion.completed_at|date:"M d, Y H:i" }}</span>
+                            {% if not task.completion.verified %}
+                            <form method="post" action="{% url 'parent_delete_completion' task.completion.id %}" class="inline ml-2">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-500 hover:underline text-xs">✖️ നീക്കം ചെയ്യുക</button>
+                            </form>
+                            {% else %}
+                            <span class="text-xs text-blue-600 ml-2 font-bold">(Verified by Teacher)</span>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <form method="post" action="{% url 'parent_complete_task' task.id %}" class="mt-2 text-right md:text-left">
+                            {% csrf_token %}
+                            <button type="submit" class="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors shadow-sm">
+                                ✅ പൂർത്തിയായി അടയാളപ്പെടുത്തുക
+                            </button>
+                        </form>
+                    {% endif %}
                 </div>
             {% empty %}
                 <div class="text-center py-8 text-gray-500 space-y-2">
