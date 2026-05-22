@@ -112,6 +112,72 @@ class MultiCentreTests(TestCase):
         response = self.teacher_town_client.get(reverse('mark_attendance', args=[self.class_town.id]))
         self.assertEqual(response.status_code, 200)
 
+    def test_student_crud(self):
+        # 1. View students list
+        response = self.admin_client.get(reverse('admin_students'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "John Doe")
+        self.assertContains(response, "Jane Smith")
+        
+        # 2. Add Student with PIN
+        response = self.admin_client.post(reverse('admin_students'), {
+            'student_id': 'STU003',
+            'first_name': 'Alice',
+            'last_name': 'Brown',
+            'class_id': self.class_town.id,
+            'pin': '9999'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Student.objects.filter(student_id="STU003", pin="9999").exists())
+        
+        # 3. Add Student with empty PIN (should auto-generate)
+        response = self.admin_client.post(reverse('admin_students'), {
+            'student_id': 'STU004',
+            'first_name': 'Bob',
+            'last_name': 'White',
+            'class_id': self.class_town.id,
+            'pin': ''
+        })
+        self.assertEqual(response.status_code, 302)
+        created_student = Student.objects.get(student_id="STU004")
+        self.assertEqual(len(created_student.pin), 4)
+        self.assertTrue(created_student.pin.isdigit())
+        
+        # 4. Edit Student
+        response = self.admin_client.post(reverse('admin_edit_student', args=[created_student.id]), {
+            'student_id': 'STU004-UPD',
+            'first_name': 'Bobby',
+            'last_name': 'White',
+            'class_id': self.class_town_2.id,
+            'pin': '8888'
+        })
+        self.assertEqual(response.status_code, 302)
+        created_student.refresh_from_db()
+        self.assertEqual(created_student.student_id, "STU004-UPD")
+        self.assertEqual(created_student.first_name, "Bobby")
+        self.assertEqual(created_student.class_group, self.class_town_2)
+        self.assertEqual(created_student.pin, "8888")
+        
+        # 5. Delete Student
+        response = self.admin_client.post(reverse('admin_delete_student', args=[created_student.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Student.objects.filter(id=created_student.id).exists())
+
+    def test_student_bulk_delete(self):
+        student3 = Student.objects.create(student_id="STU003", first_name="A", last_name="B", class_group=self.class_town, pin="1111")
+        student4 = Student.objects.create(student_id="STU004", first_name="C", last_name="D", class_group=self.class_town, pin="2222")
+        
+        # Bulk delete student3 and student4
+        response = self.admin_client.post(reverse('admin_bulk_delete_students'), {
+            'selected_students': [student3.id, student4.id]
+        })
+        self.assertEqual(response.status_code, 302)
+        
+        self.assertFalse(Student.objects.filter(id=student3.id).exists())
+        self.assertFalse(Student.objects.filter(id=student4.id).exists())
+        # Make sure STU001 is not deleted
+        self.assertTrue(Student.objects.filter(id=self.student_town.id).exists())
+
 
 class SubjectSelectionTests(TestCase):
     def setUp(self):

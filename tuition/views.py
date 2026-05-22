@@ -732,13 +732,15 @@ def admin_delete_subject_view(request, subject_id):
 def admin_students_view(request):
     active_centre = get_admin_centre(request)
     if request.method == 'POST':
-        student_id = request.POST.get('student_id')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
+        student_id = request.POST.get('student_id', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
         class_id = request.POST.get('class_id')
-        pin = request.POST.get('pin')
+        pin = request.POST.get('pin', '').strip()
         
-        if all([student_id, first_name, last_name, class_id, pin]):
+        if all([student_id, first_name, last_name, class_id]):
+            if not pin:
+                pin = generate_pin()
             class_group = get_object_or_404(ClassGroup, id=class_id)
             Student.objects.create(
                 student_id=student_id,
@@ -748,6 +750,8 @@ def admin_students_view(request):
                 pin=pin
             )
             messages.success(request, 'Student added successfully.')
+        else:
+            messages.error(request, 'Please fill in all required fields.')
         return redirect('admin_students')
         
     if active_centre:
@@ -757,6 +761,98 @@ def admin_students_view(request):
         students = Student.objects.all()
         classes = ClassGroup.objects.all()
     return render(request, 'tuition/admin_students.html', {'students': students, 'classes': classes, 'active_centre': active_centre})
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_edit_student_view(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    active_centre = get_admin_centre(request)
+    
+    if active_centre and student.class_group.centre != active_centre:
+        messages.error(request, 'You do not have permission to edit this student.')
+        return redirect('admin_students')
+        
+    if request.method == 'POST':
+        student_id_val = request.POST.get('student_id', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        class_id = request.POST.get('class_id')
+        pin = request.POST.get('pin', '').strip()
+        
+        if all([student_id_val, first_name, last_name, class_id]):
+            class_group = get_object_or_404(ClassGroup, id=class_id)
+            if active_centre and class_group.centre != active_centre:
+                messages.error(request, 'Invalid class group selection.')
+            else:
+                student.student_id = student_id_val
+                student.first_name = first_name
+                student.last_name = last_name
+                student.class_group = class_group
+                if pin:
+                    student.pin = pin
+                else:
+                    if not student.pin:
+                        student.pin = generate_pin()
+                try:
+                    student.save()
+                    messages.success(request, 'Student updated successfully.')
+                    return redirect('admin_students')
+                except Exception as e:
+                    messages.error(request, f'Failed to update student: {e}')
+        else:
+            messages.error(request, 'Please fill in all required fields.')
+            
+    if active_centre:
+        classes = ClassGroup.objects.filter(centre=active_centre)
+    else:
+        classes = ClassGroup.objects.all()
+        
+    return render(request, 'tuition/admin_edit_student.html', {
+        'student': student,
+        'classes': classes,
+        'active_centre': active_centre
+    })
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_delete_student_view(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    active_centre = get_admin_centre(request)
+    
+    if active_centre and student.class_group.centre != active_centre:
+        messages.error(request, 'You do not have permission to delete this student.')
+        return redirect('admin_students')
+        
+    if request.method == 'POST':
+        student.delete()
+        messages.success(request, 'Student deleted successfully.')
+        
+    return redirect('admin_students')
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_bulk_delete_students_view(request):
+    active_centre = get_admin_centre(request)
+    if request.method == 'POST':
+        student_ids = request.POST.getlist('selected_students')
+        if student_ids:
+            qs = Student.objects.filter(id__in=student_ids)
+            if active_centre:
+                qs = qs.filter(class_group__centre=active_centre)
+            
+            deleted_count = qs.count()
+            if deleted_count > 0:
+                qs.delete()
+                messages.success(request, f'Successfully deleted {deleted_count} student(s).')
+            else:
+                messages.error(request, 'No valid students selected for deletion.')
+        else:
+            messages.warning(request, 'No students selected.')
+            
+    return redirect('admin_students')
 
 @login_required
 @user_passes_test(is_admin)

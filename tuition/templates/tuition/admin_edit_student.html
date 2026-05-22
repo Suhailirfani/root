@@ -1,0 +1,79 @@
+{% extends 'tuition/base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <!-- Accent Banner -->
+        <div class="h-1.5 bg-gradient-to-r from-brand-500 to-indigo-500"></div>
+
+        <div class="p-6 sm:p-8">
+            <div class="flex items-center justify-between gap-4 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 text-sm text-brand-600 font-bold mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Administration Portal
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">Edit Student Details</h1>
+                </div>
+                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 uppercase">
+                    {{ student.student_id }}
+                </span>
+            </div>
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="student_id" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Student ID</label>
+                    <input type="text" name="student_id" id="student_id" required value="{{ student.student_id }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="first_name" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">First Name</label>
+                        <input type="text" name="first_name" id="first_name" required value="{{ student.first_name }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <label for="last_name" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Last Name</label>
+                        <input type="text" name="last_name" id="last_name" required value="{{ student.last_name }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="class_id" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Class/Batch</label>
+                    <select name="class_id" id="class_id" required class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                        {% for cls in classes %}
+                            <option value="{{ cls.id }}" {% if student.class_group.id == cls.id %}selected{% endif %}>{{ cls.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="pin" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Parent PIN</label>
+                    <input type="text" name="pin" id="pin" maxlength="4" value="{{ student.pin }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all font-mono tracking-widest" placeholder="PIN is required">
+                </div>
+
+                <div class="flex items-center justify-end gap-4 border-t border-gray-50 pt-6">
+                    <a href="{% url 'admin_students' %}" class="px-5 py-3 border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-bold transition-all">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition-all duration-200 shadow-sm flex items-center gap-2 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
