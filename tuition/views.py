@@ -613,6 +613,11 @@ def is_admin(user):
     return user.is_superuser or (hasattr(user, 'profile') and user.profile.role == 'admin')
 
 def get_admin_centre(request):
+    if request.user.is_authenticated and not request.user.is_superuser:
+        profile = getattr(request.user, 'profile', None)
+        if profile and profile.role == 'admin' and profile.centre:
+            return profile.centre
+            
     centre_id = request.session.get('active_centre_id')
     if centre_id:
         try:
@@ -680,6 +685,78 @@ def admin_classes_view(request):
     else:
         classes = ClassGroup.objects.all()
     return render(request, 'tuition/admin_classes.html', {'classes': classes, 'active_centre': active_centre})
+
+@login_required
+@user_passes_test(is_admin)
+def admin_edit_class_view(request, class_id):
+    class_group = get_object_or_404(ClassGroup, id=class_id)
+    active_centre = get_admin_centre(request)
+    
+    if active_centre and class_group.centre != active_centre:
+        messages.error(request, 'You do not have permission to edit this class.')
+        return redirect('admin_classes')
+        
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        centre_id = request.POST.get('centre_id')
+        teacher_id = request.POST.get('teacher_id')
+        description = request.POST.get('description', '')
+        
+        if name:
+            if active_centre:
+                target_centre = active_centre
+            elif centre_id:
+                target_centre = get_object_or_404(Centre, id=centre_id)
+            else:
+                target_centre = class_group.centre
+                
+            if ClassGroup.objects.filter(name=name, centre=target_centre).exclude(id=class_id).exists():
+                messages.error(request, 'A class with this name already exists in this centre.')
+            else:
+                try:
+                    class_group.name = name
+                    class_group.centre = target_centre
+                    class_group.description = description
+                    if teacher_id:
+                        class_group.teacher = get_object_or_404(User, id=teacher_id, profile__role='teacher')
+                    else:
+                        class_group.teacher = None
+                    class_group.save()
+                    messages.success(request, 'Class updated successfully.')
+                    return redirect('admin_classes')
+                except Exception as e:
+                    messages.error(request, f'Failed to update class: {e}')
+        else:
+            messages.error(request, 'Class Name is required.')
+            
+    if active_centre:
+        all_centres = [active_centre]
+        teachers = User.objects.filter(profile__role='teacher', profile__centre=active_centre)
+    else:
+        all_centres = Centre.objects.all()
+        teachers = User.objects.filter(profile__role='teacher')
+        
+    return render(request, 'tuition/admin_edit_class.html', {
+        'class_group': class_group,
+        'all_centres': all_centres,
+        'teachers': teachers,
+        'active_centre': active_centre
+    })
+
+@login_required
+@user_passes_test(is_admin)
+def admin_delete_class_view(request, class_id):
+    class_group = get_object_or_404(ClassGroup, id=class_id)
+    active_centre = get_admin_centre(request)
+    
+    if active_centre and class_group.centre != active_centre:
+        messages.error(request, 'You do not have permission to delete this class.')
+        return redirect('admin_classes')
+        
+    if request.method == 'POST':
+        class_group.delete()
+        messages.success(request, 'Class deleted successfully.')
+    return redirect('admin_classes')
 
 @login_required
 @user_passes_test(is_admin)

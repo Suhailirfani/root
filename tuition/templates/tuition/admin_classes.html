@@ -70,6 +70,11 @@
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                             <a href="{% url 'admin_subjects' cls.id %}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-lg transition-colors">Subjects</a>
                             <a href="{% url 'view_marks' cls.id %}" class="text-brand-600 hover:text-brand-900 bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded-lg transition-colors">View Marks</a>
+                            <a href="{% url 'admin_edit_class' cls.id %}" class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1 rounded-lg transition-colors">Edit</a>
+                            <form action="{% url 'admin_delete_class' cls.id %}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this class? This will delete associated student records, exams, and attendance logs.');">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-colors cursor-pointer border-none text-sm font-medium">Delete</button>
+                            </form>
                         </td>
                     </tr>
                     {% empty %}
@@ -110,6 +115,13 @@
                             </svg>
                             {{ cls.exams.count }}
                         </span>
+                    </div>
+                    <div class="flex justify-end gap-2 border-t border-gray-50 pt-2">
+                        <a href="{% url 'admin_edit_class' cls.id %}" class="text-xs font-medium text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg">Edit</a>
+                        <form action="{% url 'admin_delete_class' cls.id %}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this class? This will delete associated student records, exams, and attendance logs.');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-xs font-medium text-red-600 bg-red-50 px-3 py-1.5 rounded-lg border-none cursor-pointer">Delete</button>
+                        </form>
                     </div>
                 </div>
                 {% empty %}

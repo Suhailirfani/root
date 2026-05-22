@@ -195,6 +195,54 @@ class MultiCentreTests(TestCase):
         # Make sure STU001 is not deleted
         self.assertTrue(Student.objects.filter(id=self.student_town.id).exists())
 
+    def test_class_crud(self):
+        # 1. View classes page as global admin
+        response = self.admin_client.get(reverse('admin_classes'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.class_town.name)
+        self.assertContains(response, self.class_city.name)
+        
+        # 2. Edit class as global admin
+        response = self.admin_client.post(reverse('admin_edit_class', args=[self.class_town.id]), {
+            'name': 'Grade 10 Edited',
+            'centre_id': self.city_branch.id,
+            'teacher_id': self.teacher_city.id,
+            'description': 'This is an updated description'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.class_town.refresh_from_db()
+        self.assertEqual(self.class_town.name, 'Grade 10 Edited')
+        self.assertEqual(self.class_town.centre, self.city_branch)
+        self.assertEqual(self.class_town.teacher, self.teacher_city)
+        self.assertEqual(self.class_town.description, 'This is an updated description')
+        
+        # 3. Branch Admin isolation test:
+        # Create a branch admin for Town Branch
+        self.branch_admin = User.objects.create_user(username="branchadmin", password="branchpassword")
+        UserProfile.objects.create(user=self.branch_admin, role="admin", centre=self.town_branch)
+        
+        self.branch_admin_client = Client()
+        self.branch_admin_client.login(username="branchadmin", password="branchpassword")
+        
+        # Branch admin should not be able to edit class in City Branch
+        response = self.branch_admin_client.post(reverse('admin_edit_class', args=[self.class_city.id]), {
+            'name': 'Hacked Class Name',
+            'centre_id': self.town_branch.id
+        })
+        self.assertEqual(response.status_code, 302) # Redirects to classes
+        self.class_city.refresh_from_db()
+        self.assertNotEqual(self.class_city.name, 'Hacked Class Name')
+        
+        # Branch admin should not be able to delete class in City Branch
+        response = self.branch_admin_client.post(reverse('admin_delete_class', args=[self.class_city.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(ClassGroup.objects.filter(id=self.class_city.id).exists())
+        
+        # 4. Delete class as global admin
+        response = self.admin_client.post(reverse('admin_delete_class', args=[self.class_town.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(ClassGroup.objects.filter(id=self.class_town.id).exists())
+
 
 class SubjectSelectionTests(TestCase):
     def setUp(self):

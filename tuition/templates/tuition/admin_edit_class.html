@@ -1,0 +1,66 @@
+{% extends 'tuition/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Edit Class</h1>
+            <p class="text-gray-500">Update details for {{ class_group.name }}</p>
+        </div>
+        <a href="{% url 'admin_classes' %}" class="text-sm font-medium text-brand-600 hover:text-brand-500 flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Classes
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <form method="POST" action="{% url 'admin_edit_class' class_group.id %}" class="space-y-6">
+            {% csrf_token %}
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Class Name</label>
+                <input type="text" id="name" name="name" value="{{ class_group.name }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-base sm:text-sm px-3 py-3 md:py-2">
+            </div>
+
+            {% if not active_centre %}
+            <div>
+                <label for="centre_id" class="block text-sm font-medium text-gray-700 mb-1">Centre</label>
+                <select id="centre_id" name="centre_id" required class="block w-full rounded-lg border-gray-300 shadow-sm text-base sm:text-sm px-3 py-3 md:py-2">
+                    {% for c in all_centres %}
+                        <option value="{{ c.id }}" {% if class_group.centre.id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <div>
+                <label for="teacher_id" class="block text-sm font-medium text-gray-700 mb-1">Assigned Teacher</label>
+                <select id="teacher_id" name="teacher_id" class="block w-full rounded-lg border-gray-300 shadow-sm text-base sm:text-sm px-3 py-3 md:py-2">
+                    <option value="">No Teacher Assigned</option>
+                    {% for teacher in teachers %}
+                        <option value="{{ teacher.id }}" {% if class_group.teacher and class_group.teacher.id == teacher.id %}selected{% endif %}>
+                            {{ teacher.first_name }} {{ teacher.last_name }} ({{ teacher.username }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea id="description" name="description" rows="4" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-base sm:text-sm px-3 py-3 md:py-2" placeholder="Describe the class/batch (optional)...">{{ class_group.description }}</textarea>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <a href="{% url 'admin_classes' %}" class="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
