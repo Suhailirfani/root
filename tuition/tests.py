@@ -163,6 +163,23 @@ class MultiCentreTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Student.objects.filter(id=created_student.id).exists())
 
+    def test_student_detail_view(self):
+        # 1. View student detail page (own centre student)
+        response = self.admin_client.get(reverse('admin_student_detail', args=[self.student_town.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.student_town.full_name)
+        self.assertContains(response, self.student_town.pin)
+        
+        # 2. Switch to City Branch (now student_town is outside active centre)
+        self.admin_client.get(reverse('admin_switch_centre', args=[self.city_branch.id]))
+        response = self.admin_client.get(reverse('admin_student_detail', args=[self.student_town.id]))
+        # Should redirect back to admin_students with error
+        self.assertEqual(response.status_code, 302)
+        
+        # 3. Requesting a non-existent student should return 404
+        response = self.admin_client.get(reverse('admin_student_detail', args=[99999]))
+        self.assertEqual(response.status_code, 404)
+
     def test_student_bulk_delete(self):
         student3 = Student.objects.create(student_id="STU003", first_name="A", last_name="B", class_group=self.class_town, pin="1111")
         student4 = Student.objects.create(student_id="STU004", first_name="C", last_name="D", class_group=self.class_town, pin="2222")

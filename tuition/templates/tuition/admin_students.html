@@ -105,6 +105,9 @@
                 <table class="min-w-full divide-y divide-gray-100 hidden md:table">
                     <thead>
                         <tr class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left w-10">
+                                <input type="checkbox" class="select-all-class rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer" data-class-id="{{ group.class.id }}">
+                            </th>
                             <th class="px-6 py-3 text-left w-10">#</th>
                             <th class="px-6 py-3 text-left">Student ID</th>
                             <th class="px-6 py-3 text-left">Name</th>
@@ -114,6 +117,10 @@
                     <tbody class="divide-y divide-gray-50">
                         {% for s in group.students %}
                         <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3 text-left w-10">
+                                <input type="checkbox" name="selected_students" value="{{ s.id }}" form="global-bulk-delete-form"
+                                       class="student-checkbox rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer" data-class-id="{{ group.class.id }}">
+                            </td>
                             <td class="px-6 py-3 text-sm text-gray-400">{{ forloop.counter }}</td>
                             <td class="px-6 py-3 text-sm font-mono text-gray-600">{{ s.student_id }}</td>
                             <td class="px-6 py-3">
@@ -131,7 +138,7 @@
                                     Edit
                                 </a>
                                 <form method="POST" action="{% url 'admin_delete_student' s.id %}" class="inline"
-                                      onsubmit="return confirm('Delete {{ s.full_name }}? This will permanently remove their attendance and marks.');">
+                                       onsubmit="return confirm('Delete {{ s.full_name }}? This will permanently remove their attendance and marks.');">
                                     {% csrf_token %}
                                     <button type="submit"
                                             class="inline-flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-800 transition-colors cursor-pointer">
@@ -151,10 +158,14 @@
                 <div class="md:hidden divide-y divide-gray-50">
                     {% for s in group.students %}
                     <div class="px-4 py-3 flex justify-between items-center hover:bg-gray-50">
-                        <div>
-                            <a href="{% url 'admin_student_detail' s.id %}"
-                               class="text-sm font-bold text-brand-700 hover:underline">{{ s.full_name }}</a>
-                            <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ s.student_id }}</p>
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="selected_students" value="{{ s.id }}" form="global-bulk-delete-form"
+                                   class="student-checkbox rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer" data-class-id="{{ group.class.id }}">
+                            <div>
+                                <a href="{% url 'admin_student_detail' s.id %}"
+                                   class="text-sm font-bold text-brand-700 hover:underline">{{ s.full_name }}</a>
+                                <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ s.student_id }}</p>
+                            </div>
                         </div>
                         <div class="flex items-center gap-2">
                             <a href="{% url 'admin_edit_student' s.id %}" class="p-2 text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
@@ -189,11 +200,95 @@
     </div>
 </div>
 
+<form method="POST" action="{% url 'admin_bulk_delete_students' %}" id="global-bulk-delete-form">
+    {% csrf_token %}
+</form>
+
+<!-- Floating bulk action bar -->
+<div id="bulk-action-bar" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-md border border-gray-200 px-6 py-4 rounded-2xl shadow-xl flex items-center gap-6 transition-all duration-300 translate-y-24 opacity-0 pointer-events-none z-50">
+    <span class="text-sm font-semibold text-gray-700">
+        <span id="selected-count" class="text-brand-600 font-bold">0</span> selected
+    </span>
+    <div class="h-6 w-px bg-gray-200"></div>
+    <button type="submit" form="global-bulk-delete-form" id="bulk-delete-btn"
+            class="px-4 py-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow transition-all cursor-pointer">
+        Delete Selected
+    </button>
+</div>
+
 <script>
 function confirmDeleteClass(classId, className) {
     if (confirm('Delete ALL students in ' + className + '? This cannot be undone.')) {
         document.getElementById('bulk-delete-form-' + classId).submit();
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const classHeaders = document.querySelectorAll('.select-all-class');
+    const checkboxes = document.querySelectorAll('.student-checkbox');
+    const bulkBar = document.getElementById('bulk-action-bar');
+    const selectedCount = document.getElementById('selected-count');
+    const bulkForm = document.getElementById('global-bulk-delete-form');
+
+    function updateBulkBar() {
+        const checkedBoxes = document.querySelectorAll('.student-checkbox:checked');
+        const count = checkedBoxes.length;
+        selectedCount.textContent = count;
+
+        if (count > 0) {
+            bulkBar.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+            bulkBar.classList.add('translate-y-0', 'opacity-100');
+        } else {
+            bulkBar.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+            bulkBar.classList.remove('translate-y-0', 'opacity-100');
+        }
+
+        // Sync header select-all check state for each class group
+        const classIds = new Set();
+        checkboxes.forEach(cb => classIds.add(cb.dataset.classId));
+        classIds.forEach(classId => {
+            const classCbs = document.querySelectorAll(`.student-checkbox[data-class-id="${classId}"]`);
+            const classCheckedCbs = document.querySelectorAll(`.student-checkbox[data-class-id="${classId}"]:checked`);
+            const headerCb = document.querySelector(`.select-all-class[data-class-id="${classId}"]`);
+            if (headerCb) {
+                headerCb.checked = (classCbs.length > 0 && classCbs.length === classCheckedCbs.length);
+            }
+        });
+    }
+
+    // Handle select all for a class group
+    classHeaders.forEach(header => {
+        header.addEventListener('change', function() {
+            const classId = this.dataset.classId;
+            const classCbs = document.querySelectorAll(`.student-checkbox[data-class-id="${classId}"]`);
+            classCbs.forEach(cb => {
+                cb.checked = this.checked;
+            });
+            updateBulkBar();
+        });
+    });
+
+    // Handle individual checkbox changes
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            updateBulkBar();
+        });
+    });
+
+    // Form submit confirmation
+    bulkForm.addEventListener('submit', function(e) {
+        const checkedBoxes = document.querySelectorAll('.student-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+            e.preventDefault();
+            return;
+        }
+        if (!confirm('Are you sure you want to delete the ' + checkedBoxes.length + ' selected student records? This will permanently delete all associated attendance and mark entries.')) {
+            e.preventDefault();
+        }
+    });
+
+    // Initial check
+    updateBulkBar();
+});
 </script>
 {% endblock %}
