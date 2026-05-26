@@ -5,7 +5,7 @@ def multi_centre_context(request):
         return {}
         
     profile = getattr(request.user, 'profile', None)
-    is_admin = request.user.is_superuser or (profile and profile.role == 'admin')
+    is_admin = request.user.is_superuser or request.user.is_staff or (profile and profile.role == 'admin')
     
     if is_admin:
         if not request.user.is_superuser and profile and profile.centre:

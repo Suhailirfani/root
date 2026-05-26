@@ -610,7 +610,7 @@ def delete_task_view(request, task_id):
 # --- Admin Portal Views ---
 
 def is_admin(user):
-    return user.is_superuser or (hasattr(user, 'profile') and user.profile.role == 'admin')
+    return user.is_superuser or user.is_staff or (hasattr(user, 'profile') and user.profile.role == 'admin')
 
 def get_admin_centre(request):
     if request.user.is_authenticated and not request.user.is_superuser:
@@ -797,10 +797,8 @@ def admin_edit_subject_view(request, subject_id):
     return render(request, 'tuition/admin_edit_subject.html', {'subject': subject})
 
 @login_required
+@user_passes_test(is_admin, login_url='admin_login')
 def admin_working_days_view(request):
-    profile = getattr(request.user, 'profile', None)
-    if not profile or profile.role != 'admin':
-        return redirect('parent_login')
 
     import calendar
     from datetime import date, timedelta

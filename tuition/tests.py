@@ -431,3 +431,35 @@ class HomeTaskTests(TestCase):
         self.assertContains(response, "Read pages 50-60 of textbook.")
         self.assertContains(response, "വിഷയം: Physics")
 
+
+class WorkingDaysAccessTests(TestCase):
+    def setUp(self):
+        # 1. Superuser without profile
+        self.superuser = User.objects.create_superuser(username="super", email="super@example.com", password="superpassword")
+        
+        # 2. Admin with profile
+        self.centre = Centre.objects.create(name="Main Branch", code="MB")
+        self.admin_user = User.objects.create_user(username="admin_user", password="adminpassword")
+        self.admin_profile = UserProfile.objects.create(user=self.admin_user, role="admin", centre=self.centre)
+        
+        # 3. Non-admin user (teacher)
+        self.teacher_user = User.objects.create_user(username="teacher_user", password="teacherpassword")
+        self.teacher_profile = UserProfile.objects.create(user=self.teacher_user, role="teacher", centre=self.centre)
+
+    def test_superuser_access_working_days(self):
+        self.client.login(username="super", password="superpassword")
+        response = self.client.get(reverse('admin_working_days'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_admin_access_working_days(self):
+        self.client.login(username="admin_user", password="adminpassword")
+        response = self.client.get(reverse('admin_working_days'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_non_admin_redirected(self):
+        self.client.login(username="teacher_user", password="teacherpassword")
+        response = self.client.get(reverse('admin_working_days'))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('admin_login') + '?next=' + reverse('admin_working_days'))
+
+
