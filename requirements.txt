@@ -5,4 +5,6 @@ whitenoise==6.11.0
 sqlparse==0.4.4
 asgiref==3.11.0
 tzdata==2023.4
-
+html5lib==1.1
+reportlab==4.2.5
+xhtml2pdf==0.2.16

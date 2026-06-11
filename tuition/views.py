@@ -10,6 +10,15 @@ from django.contrib.auth.models import User
 import csv
 import random
 import string
+import json
+
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import get_template
+from io import BytesIO
+try:
+    from xhtml2pdf import pisa
+except ImportError:
+    pisa = None
 
 def generate_pin(length=4):
     return ''.join(random.choices(string.digits, k=length))
@@ -37,23 +46,15 @@ def parent_logout_view(request):
         del request.session['logged_in_student']
     return redirect('landing_page')
 
-def parent_dashboard_view(request):
-    student_id = request.session.get('logged_in_student')
-    if not student_id:
-        return redirect('parent_login')
-        
-    student = get_object_or_404(Student, id=student_id)
+def get_student_dashboard_context(student):
     class_group = student.class_group
     
     # 1. Attendance calculation
-    # Total working days = count of WorkingDay records since student joined up to today
-    # Fallback to old logic if Admin hasn't configured any WorkingDays yet.
-    if WorkingDay.objects.exists():
-        total_days = WorkingDay.objects.filter(date__gte=student.created_at.date(), date__lte=timezone.now().date(), is_working_day=True).count()
-    else:
-        total_days = Attendance.objects.filter(student=student).count()
-        
-    present_days = Attendance.objects.filter(student=student, status='present').count()
+    # Total days should be based on the number of attendance records for the student
+    total_days = Attendance.objects.filter(student=student).count()
+    
+    # Present and late both count towards positive attendance (or you can adjust this if late is half)
+    present_days = Attendance.objects.filter(student=student, status__in=['present', 'late']).count()
     attendance_percentage = (present_days / total_days * 100) if total_days > 0 else 0
     
     # Today's attendance status
@@ -181,10 +182,19 @@ def parent_dashboard_view(request):
         
     chart_subjects = [{'id': s.id, 'name': s.name} for s in subjects]
 
-    context = {
+    # 7. Calendar Data
+    attendance_records = Attendance.objects.filter(student=student)
+    attendance_dict = {att.date.strftime('%Y-%m-%d'): att.status for att in attendance_records}
+    
+    working_days = WorkingDay.objects.all()
+    working_days_dict = {wd.date.strftime('%Y-%m-%d'): wd.is_working_day for wd in working_days}
+
+    return {
         'student': student,
         'attendance_percentage': attendance_percentage,
         'today_status': today_status,
+        'attendance_json': json.dumps(attendance_dict),
+        'working_days_json': json.dumps(working_days_dict),
         'chart_labels': labels,
         'chart_data': data,
         'subjects': subjects,
@@ -195,6 +205,64 @@ def parent_dashboard_view(request):
         'upcoming_exams': upcoming_exams,
         'today_tasks': today_tasks,
     }
+
+def parent_dashboard_view(request):
+    student_id = request.session.get('logged_in_student')
+    if not student_id:
+        return redirect('parent_login')
+        
+    student = get_object_or_404(Student, id=student_id)
+    context = get_student_dashboard_context(student)
+    return render(request, 'tuition/parent_dashboard.html', context)
+
+@login_required
+def download_progress_card_pdf_view(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    
+    # Permission checks similar to dashboard
+    profile = getattr(request.user, 'profile', None)
+    if profile and profile.role in ['teacher', 'admin']:
+        if profile.centre and student.class_group.centre != profile.centre:
+            messages.error(request, "Access denied.")
+            return redirect('landing_page')
+    elif not (request.user.is_superuser or request.user.is_staff):
+        logged_in_id = request.session.get('logged_in_student')
+        if not logged_in_id or int(logged_in_id) != student.id:
+            messages.error(request, "Access denied.")
+            return redirect('parent_login')
+            
+    context = get_student_dashboard_context(student)
+    template = get_template('tuition/progress_card_pdf.html')
+    html = template.render(context)
+    
+    result = BytesIO()
+    if pisa:
+        pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+        if not pdf.err:
+            response = HttpResponse(result.getvalue(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{student.full_name}_Progress_Card.pdf"'
+            return response
+    
+    messages.error(request, "Failed to generate PDF on the server.")
+    return redirect(request.META.get('HTTP_REFERER', 'landing_page'))
+
+@login_required
+def teacher_student_dashboard_view(request, student_id):
+    profile = getattr(request.user, 'profile', None)
+    if not (request.user.is_superuser or request.user.is_staff or (profile and profile.role in ['teacher', 'admin'])):
+        messages.error(request, "Access denied.")
+        return redirect('landing_page')
+        
+    student = get_object_or_404(Student, id=student_id)
+    
+    # Ensure a teacher can only view their own centre's students if restricted
+    if profile and profile.role == 'teacher' and profile.centre:
+        if student.class_group.centre != profile.centre:
+            messages.error(request, "Access denied. Student not in your centre.")
+            return redirect('teacher_dashboard')
+            
+    context = get_student_dashboard_context(student)
+    context['is_teacher_viewing'] = True  # Add a flag to context if needed
     return render(request, 'tuition/parent_dashboard.html', context)
 
 # --- Homework Completion Views ---

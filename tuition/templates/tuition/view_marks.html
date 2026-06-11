@@ -84,7 +84,11 @@
                                 {{ entry.rank }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ entry.student.full_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <a href="{% url 'teacher_student_dashboard' entry.student.id %}" target="_blank" class="text-brand-600 hover:text-brand-800 hover:underline" title="View Student Dashboard">
+                                {{ entry.student.full_name }}
+                            </a>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold {% if entry.marks_obtained >= selected_exam.passing_marks %}text-green-600{% else %}text-red-600{% endif %}">
                             {{ entry.marks_obtained|floatformat:0 }}
                         </td>
@@ -105,7 +109,11 @@
                             {{ entry.rank }}
                         </span>
                         <div>
-                            <p class="text-sm font-bold text-gray-900">{{ entry.student.full_name }}</p>
+                            <p class="text-sm font-bold text-gray-900">
+                                <a href="{% url 'teacher_student_dashboard' entry.student.id %}" target="_blank" class="text-brand-600 hover:text-brand-800 hover:underline" title="View Student Dashboard">
+                                    {{ entry.student.full_name }}
+                                </a>
+                            </p>
                             <p class="text-xs text-gray-500">{{ entry.percentage|floatformat:1 }}%</p>
                         </div>
                     </div>
