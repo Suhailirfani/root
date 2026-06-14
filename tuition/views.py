@@ -215,7 +215,6 @@ def parent_dashboard_view(request):
     context = get_student_dashboard_context(student)
     return render(request, 'tuition/parent_dashboard.html', context)
 
-@login_required
 def download_progress_card_pdf_view(request, student_id):
     student = get_object_or_404(Student, id=student_id)
     
