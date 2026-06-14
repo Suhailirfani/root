@@ -5,22 +5,22 @@
     <title>Progress Card</title>
     <style>
         @page {
-            size: a4 portrait;
-            margin: 1.5cm;
+            size: a4 landscape;
+            margin: 1cm;
             @frame header {
                 -pdf-frame-content: header_content;
-                top: 1cm; margin-left: 1.5cm; margin-right: 1.5cm; height: 1cm;
+                top: 0.5cm; margin-left: 1cm; margin-right: 1cm; height: 1cm;
             }
             @frame footer {
                 -pdf-frame-content: footer_content;
-                bottom: 1cm; margin-left: 1.5cm; margin-right: 1.5cm; height: 1cm;
+                bottom: 0.5cm; margin-left: 1cm; margin-right: 1cm; height: 1cm;
             }
         }
         body {
             font-family: Helvetica, sans-serif;
             color: #333;
-            line-height: 1.4;
-            font-size: 12px;
+            line-height: 1.3;
+            font-size: 11px;
         }
         .header {
             text-align: center;
@@ -71,8 +71,10 @@
         }
         table.marks-table th, table.marks-table td {
             border: 1px solid #d1d5db;
-            padding: 8px;
+            padding: 4px 2px;
             text-align: center;
+            font-size: 10px;
+            word-wrap: break-word;
         }
         table.marks-table th {
             background-color: #f3f4f6;
