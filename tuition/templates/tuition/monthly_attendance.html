@@ -46,6 +46,10 @@
                 <span class="text-xs font-medium text-gray-600">Absent</span>
             </div>
             <div class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                <span class="text-xs font-medium text-gray-600">Late</span>
+            </div>
+            <div class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded-full border border-gray-300"></span>
                 <span class="text-xs font-medium text-gray-600">Unmarked</span>
             </div>
@@ -88,23 +92,18 @@
                             {% for wd in working_days %}
                             <td class="px-2 py-3 text-center border-r border-gray-100 last:border-r-0">
                                 <div class="flex justify-center items-center h-full">
-                                    <!-- Use a custom checkmark switch approach or standard checkbox -->
-                                    <input type="checkbox" name="att_{{ student.id }}_{{ wd.date|date:'Y-m-d' }}"
-                                           class="w-5 h-5 rounded border-gray-300 text-green-500 focus:ring-green-500 focus:ring-2 cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-gray-100"
+                                    <!-- Use a select dropdown for 3 options -->
+                                    <select name="att_{{ student.id }}_{{ wd.date|date:'Y-m-d' }}"
+                                           class="text-xs font-bold rounded-md border-gray-300 py-1 pl-2 pr-6 focus:ring-green-500 focus:border-green-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-gray-100
+                                           {% for stud_id, dates in attendance_map.items %}{% if stud_id == student.id %}{% for date, status in dates.items %}{% if date == wd.date %}{% if status == 'present' %}bg-green-50 text-green-700{% elif status == 'absent' %}bg-red-50 text-red-700{% elif status == 'late' %}bg-yellow-50 text-yellow-700{% endif %}{% endif %}{% endfor %}{% endif %}{% endfor %}"
                                            title="{{ wd.date|date:'M d, Y' }}"
                                            {% if wd.date > today or not wd.is_working_day %}disabled{% endif %}
-                                           
-                                           {# Custom template logic to check if they are present #}
-                                           {% for stud_id, dates in attendance_map.items %}
-                                                {% if stud_id == student.id %}
-                                                    {% for date, status in dates.items %}
-                                                        {% if date == wd.date %}
-                                                            {% if status == 'present' %}checked{% endif %}
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                {% endif %}
-                                           {% endfor %}
                                     >
+                                        <option value="unmarked">-</option>
+                                        <option value="present" {% for stud_id, dates in attendance_map.items %}{% if stud_id == student.id %}{% for date, status in dates.items %}{% if date == wd.date and status == 'present' %}selected{% endif %}{% endfor %}{% endif %}{% endfor %}>P</option>
+                                        <option value="absent" {% for stud_id, dates in attendance_map.items %}{% if stud_id == student.id %}{% for date, status in dates.items %}{% if date == wd.date and status == 'absent' %}selected{% endif %}{% endfor %}{% endif %}{% endfor %}>A</option>
+                                        <option value="late" {% for stud_id, dates in attendance_map.items %}{% if stud_id == student.id %}{% for date, status in dates.items %}{% if date == wd.date and status == 'late' %}selected{% endif %}{% endfor %}{% endif %}{% endfor %}>L</option>
+                                    </select>
                                 </div>
                             </td>
                             {% endfor %}

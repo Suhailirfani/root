@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ROOT Tuition Centre{% endblock %}</title>
     <link rel="icon" type="image/png" href="{% static 'images/logo-removebg.png' %}">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#db2777">
+    <link rel="apple-touch-icon" href="{% static 'images/logo-removebg.png' %}">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -118,6 +121,9 @@
                             <a href="{% url 'teacher_logout' %}" class="text-gray-500 hover:text-gray-900 px-3 py-3 md:py-2 rounded-md text-base md:text-sm font-medium transition-colors">Logout ({{ request.user.username }})</a>
                         {% endif %}
                     {% endif %}
+                    <button id="installAppBtn" class="hidden text-brand-600 border border-brand-600 hover:bg-brand-50 px-3 py-2 rounded-md text-xs font-bold transition-colors">
+                        Install App
+                    </button>
                 </div>
             </div>
         </div>
@@ -145,6 +151,45 @@
         </div>
     </footer>
 
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
+        let deferredPrompt;
+        const installBtn = document.getElementById('installAppBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.remove('hidden');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt !== null) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+                installBtn.classList.add('hidden');
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBtn.classList.add('hidden');
+            console.log('PWA was installed');
+        });
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

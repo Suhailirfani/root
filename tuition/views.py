@@ -435,21 +435,16 @@ def monthly_attendance_view(request, class_id):
             for wd in working_days:
                 if not wd.is_working_day or wd.date > timezone.now().date():
                     continue
-                # the checkbox name will be something like att_studentId_date
                 att_key = f"att_{student.id}_{wd.date.strftime('%Y-%m-%d')}"
-                if att_key in request.POST:
+                status_val = request.POST.get(att_key)
+                if status_val in ['present', 'absent', 'late']:
                     Attendance.objects.update_or_create(
                         student=student,
                         date=wd.date,
-                        defaults={'status': 'present', 'marked_by': request.user}
+                        defaults={'status': status_val, 'marked_by': request.user}
                     )
-                else:
-                    # If not checked, we mark as absent (only if we are updating or if it doesn't exist)
-                    Attendance.objects.update_or_create(
-                        student=student,
-                        date=wd.date,
-                        defaults={'status': 'absent', 'marked_by': request.user}
-                    )
+                elif status_val == 'unmarked':
+                    Attendance.objects.filter(student=student, date=wd.date).delete()
         messages.success(request, f'Monthly attendance updated successfully for {calendar.month_name[month]} {year}.')
         return redirect('monthly_attendance', class_id=class_id)
         
