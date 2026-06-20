@@ -245,7 +245,7 @@ def download_progress_card_pdf_view(request, student_id):
     messages.error(request, "Failed to generate PDF on the server.")
     return redirect(request.META.get('HTTP_REFERER', 'landing_page'))
 
-@login_required
+@login_required(login_url='teacher_login')
 def teacher_student_dashboard_view(request, student_id):
     profile = getattr(request.user, 'profile', None)
     if not (request.user.is_superuser or request.user.is_staff or (profile and profile.role in ['teacher', 'admin'])):
@@ -329,7 +329,7 @@ def teacher_login_view(request):
             messages.error(request, 'Invalid Username or Password.')
     return render(request, 'tuition/teacher_login.html')
 
-@login_required
+@login_required(login_url='teacher_login')
 def teacher_logout_view(request):
     logout(request)
     return redirect('landing_page')
@@ -349,12 +349,12 @@ def admin_login_view(request):
             messages.error(request, 'Invalid Username or Password.')
     return render(request, 'tuition/admin_login.html')
 
-@login_required
+@login_required(login_url='teacher_login')
 def admin_logout_view(request):
     logout(request)
     return redirect('landing_page')
 
-@login_required
+@login_required(login_url='teacher_login')
 def teacher_dashboard_view(request):
     classes = ClassGroup.objects.all()
     profile = getattr(request.user, 'profile', None)
@@ -368,7 +368,7 @@ def teacher_dashboard_view(request):
             
     return render(request, 'tuition/teacher_dashboard.html', {'classes': classes})
 
-@login_required
+@login_required(login_url='teacher_login')
 def mark_attendance_view(request, class_id):
     profile = getattr(request.user, 'profile', None)
     if profile and profile.role == 'teacher' and profile.centre:
@@ -393,7 +393,7 @@ def mark_attendance_view(request, class_id):
         
     return render(request, 'tuition/mark_attendance.html', {'class_group': class_group, 'students': students})
 
-@login_required
+@login_required(login_url='teacher_login')
 def monthly_attendance_view(request, class_id):
     profile = getattr(request.user, 'profile', None)
     if profile and profile.role == 'teacher' and profile.centre:
@@ -463,7 +463,7 @@ def monthly_attendance_view(request, class_id):
     }
     return render(request, 'tuition/monthly_attendance.html', context)
 
-@login_required
+@login_required(login_url='teacher_login')
 def enter_marks_view(request, class_id):
     profile = getattr(request.user, 'profile', None)
     if profile and profile.role == 'teacher' and profile.centre:
@@ -546,7 +546,7 @@ def enter_marks_view(request, class_id):
     }
     return render(request, 'tuition/enter_marks.html', context)
 
-@login_required
+@login_required(login_url='teacher_login')
 def view_marks_view(request, class_id):
     profile = getattr(request.user, 'profile', None)
     if profile and profile.role == 'teacher' and profile.centre:
@@ -602,7 +602,7 @@ def view_marks_view(request, class_id):
     return render(request, 'tuition/view_marks.html', context)
 
 
-@login_required
+@login_required(login_url='teacher_login')
 def manage_tasks_view(request, class_id):
     profile = getattr(request.user, 'profile', None)
     if profile and profile.role == 'teacher' and profile.centre:
@@ -651,7 +651,7 @@ def manage_tasks_view(request, class_id):
     })
 
 
-@login_required
+@login_required(login_url='teacher_login')
 def delete_task_view(request, task_id):
     task = get_object_or_404(HomeTask, id=task_id)
     class_id = task.class_group.id
@@ -688,7 +688,7 @@ def get_admin_centre(request):
             request.session['active_centre_id'] = None
     return None
 
-@login_required
+@login_required(login_url='teacher_login')
 @user_passes_test(is_admin, login_url='/teacher/')
 def admin_dashboard_view(request):
     active_centre = get_admin_centre(request)
@@ -717,7 +717,7 @@ def admin_dashboard_view(request):
     }
     return render(request, 'tuition/admin_dashboard.html', context)
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_classes_view(request):
     active_centre = get_admin_centre(request)
@@ -748,7 +748,7 @@ def admin_classes_view(request):
         classes = ClassGroup.objects.all()
     return render(request, 'tuition/admin_classes.html', {'classes': classes, 'active_centre': active_centre})
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_edit_class_view(request, class_id):
     class_group = get_object_or_404(ClassGroup, id=class_id)
@@ -805,7 +805,7 @@ def admin_edit_class_view(request, class_id):
         'active_centre': active_centre
     })
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_delete_class_view(request, class_id):
     class_group = get_object_or_404(ClassGroup, id=class_id)
@@ -820,7 +820,7 @@ def admin_delete_class_view(request, class_id):
         messages.success(request, 'Class deleted successfully.')
     return redirect('admin_classes')
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_subjects_view(request, class_id):
     class_group = get_object_or_404(ClassGroup, id=class_id)
@@ -839,7 +839,7 @@ def admin_subjects_view(request, class_id):
     subjects = class_group.subjects.all()
     return render(request, 'tuition/admin_subjects.html', {'class_group': class_group, 'subjects': subjects})
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_edit_subject_view(request, subject_id):
     subject = get_object_or_404(Subject, id=subject_id)
@@ -858,7 +858,7 @@ def admin_edit_subject_view(request, subject_id):
             
     return render(request, 'tuition/admin_edit_subject.html', {'subject': subject})
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin, login_url='admin_login')
 def admin_working_days_view(request):
 
@@ -928,7 +928,7 @@ def admin_working_days_view(request):
     }
     return render(request, 'tuition/admin_working_days.html', context)
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_delete_subject_view(request, subject_id):
     subject = get_object_or_404(Subject, id=subject_id)
@@ -938,7 +938,7 @@ def admin_delete_subject_view(request, subject_id):
         messages.success(request, 'Subject deleted successfully.')
     return redirect('admin_subjects', class_id=class_id)
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_students_view(request):
     active_centre = get_admin_centre(request)
@@ -984,7 +984,7 @@ def admin_students_view(request):
     })
 
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_student_detail_view(request, student_id):
     student = get_object_or_404(Student, id=student_id)
@@ -1000,7 +1000,7 @@ def admin_student_detail_view(request, student_id):
     })
 
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_edit_student_view(request, student_id):
     student = get_object_or_404(Student, id=student_id)
@@ -1052,7 +1052,7 @@ def admin_edit_student_view(request, student_id):
     })
 
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_delete_student_view(request, student_id):
     student = get_object_or_404(Student, id=student_id)
@@ -1069,7 +1069,7 @@ def admin_delete_student_view(request, student_id):
     return redirect('admin_students')
 
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_bulk_delete_students_view(request):
     active_centre = get_admin_centre(request)
@@ -1091,7 +1091,7 @@ def admin_bulk_delete_students_view(request):
             
     return redirect('admin_students')
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_exams_view(request):
     active_centre = get_admin_centre(request)
@@ -1140,7 +1140,7 @@ def admin_exams_view(request):
         'active_centre': active_centre
     })
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_edit_exam_view(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
@@ -1187,7 +1187,7 @@ def admin_edit_exam_view(request, exam_id):
         'subjects': subjects
     })
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_delete_exam_view(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
@@ -1196,7 +1196,7 @@ def admin_delete_exam_view(request, exam_id):
         messages.success(request, 'Exam deleted successfully.')
     return redirect('admin_exams')
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_teachers_view(request):
     active_centre = get_admin_centre(request)
@@ -1236,7 +1236,7 @@ def admin_teachers_view(request):
         teachers = User.objects.filter(profile__role='teacher')
     return render(request, 'tuition/admin_teachers.html', {'teachers': teachers, 'active_centre': active_centre})
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_bulk_teachers_view(request):
     active_centre = get_admin_centre(request)
@@ -1273,7 +1273,7 @@ def admin_bulk_teachers_view(request):
             
     return redirect('admin_teachers')
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_edit_teacher_view(request, teacher_id):
     teacher = get_object_or_404(User, id=teacher_id, profile__role='teacher')
@@ -1320,7 +1320,7 @@ def admin_edit_teacher_view(request, teacher_id):
         'active_centre': active_centre
     })
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_delete_teacher_view(request, teacher_id):
     teacher = get_object_or_404(User, id=teacher_id, profile__role='teacher')
@@ -1337,7 +1337,7 @@ def admin_delete_teacher_view(request, teacher_id):
         
     return redirect('admin_teachers')
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_bulk_students_view(request):
     active_centre = get_admin_centre(request)
@@ -1381,7 +1381,7 @@ def admin_bulk_students_view(request):
 
 
 # Centre Management Views
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_switch_centre_view(request, centre_id):
     if centre_id == 0:
@@ -1398,7 +1398,7 @@ def admin_switch_centre_view(request, centre_id):
     return redirect('admin_dashboard')
 
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_centres_view(request):
     if request.method == 'POST':
@@ -1427,7 +1427,7 @@ def admin_centres_view(request):
     return render(request, 'tuition/admin_centres.html', {'centres': centres})
 
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_edit_centre_view(request, centre_id):
     centre = get_object_or_404(Centre, id=centre_id)
@@ -1456,7 +1456,7 @@ def admin_edit_centre_view(request, centre_id):
     return render(request, 'tuition/admin_edit_centre.html', {'centre': centre})
 
 
-@login_required
+@login_required(login_url='admin_login')
 @user_passes_test(is_admin)
 def admin_delete_centre_view(request, centre_id):
     centre = get_object_or_404(Centre, id=centre_id)
