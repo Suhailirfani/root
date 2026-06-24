@@ -1,0 +1,59 @@
+{% extends 'tuition/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Header Section -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-blue-500">
+        <div class="flex items-center gap-4">
+            <div class="h-16 w-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Manage Students</h1>
+                <p class="text-gray-500">{{ class_group.name }}</p>
+            </div>
+        </div>
+        <a href="{% url 'teacher_dashboard' %}" class="text-sm font-medium text-brand-600 hover:text-brand-500">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Students Grid -->
+    <div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for student in students %}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="h-12 w-12 rounded-full bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center text-brand-600 font-bold text-lg">
+                            {{ student.first_name|first }}{{ student.last_name|first }}
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">{{ student.first_name }} {{ student.last_name }}</h3>
+                            <p class="text-sm text-gray-500">ID: {{ student.student_id }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-auto pt-4 border-t border-gray-50">
+                        <a href="{% url 'teacher_student_dashboard' student.id %}" class="w-full flex items-center justify-center px-4 py-2 border border-blue-200 rounded-xl shadow-sm text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            View Dashboard
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-span-full bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 p-12 text-center">
+                    <h3 class="text-lg font-medium text-gray-900">No students found</h3>
+                    <p class="mt-1 text-sm text-gray-500">There are no active students in this class yet.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

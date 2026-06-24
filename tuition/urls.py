@@ -14,6 +14,7 @@ urlpatterns = [
     path('teacher/class/<int:class_id>/monthly_attendance/', views.monthly_attendance_view, name='monthly_attendance'),
     path('teacher/class/<int:class_id>/marks/', views.enter_marks_view, name='enter_marks'),
     path('teacher/class/<int:class_id>/tasks/', views.manage_tasks_view, name='manage_tasks'),
+    path('teacher/class/<int:class_id>/students/', views.teacher_class_students_view, name='teacher_class_students'),
     path('teacher/student/<int:student_id>/dashboard/', views.teacher_student_dashboard_view, name='teacher_student_dashboard'),
     path('student/<int:student_id>/progress-pdf/', views.download_progress_card_pdf_view, name='download_progress_card_pdf'),
     path('parent/task/<int:task_id>/complete/', views.parent_complete_task, name='parent_complete_task'),

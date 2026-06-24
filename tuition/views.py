@@ -23,6 +23,9 @@ except ImportError:
 def generate_pin(length=4):
     return ''.join(random.choices(string.digits, k=length))
 
+from django.views.decorators.cache import never_cache
+
+@never_cache
 def landing_page_view(request):
     return render(request, 'tuition/landing.html')
 
@@ -349,7 +352,7 @@ def admin_login_view(request):
             messages.error(request, 'Invalid Username or Password.')
     return render(request, 'tuition/admin_login.html')
 
-@login_required(login_url='teacher_login')
+@login_required(login_url='admin_login')
 def admin_logout_view(request):
     logout(request)
     return redirect('landing_page')
@@ -668,6 +671,20 @@ def delete_task_view(request, task_id):
         
     return redirect('manage_tasks', class_id=class_id)
 
+
+@login_required(login_url='teacher_login')
+def teacher_class_students_view(request, class_id):
+    profile = getattr(request.user, 'profile', None)
+    if profile and profile.role == 'teacher' and profile.centre:
+        class_group = get_object_or_404(ClassGroup, id=class_id, centre=profile.centre)
+    else:
+        class_group = get_object_or_404(ClassGroup, id=class_id)
+        
+    students = class_group.students.filter(is_active=True).order_by('first_name')
+    return render(request, 'tuition/teacher_class_students.html', {
+        'class_group': class_group,
+        'students': students
+    })
 
 # --- Admin Portal Views ---
 

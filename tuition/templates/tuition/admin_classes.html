@@ -44,8 +44,9 @@
         <!-- Class List -->
         <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <!-- Desktop Table View -->
-            <table class="min-w-full divide-y divide-gray-200 hidden md:table">
-                <thead class="bg-gray-50">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 hidden md:table">
+                    <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class Name</th>
                         {% if not active_centre %}
@@ -84,6 +85,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            </div>
 
             <!-- Mobile Card View -->
             <div class="md:hidden divide-y divide-gray-100">
