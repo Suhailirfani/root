@@ -47,6 +47,7 @@ def parent_login_view(request):
 def parent_logout_view(request):
     if 'logged_in_student' in request.session:
         del request.session['logged_in_student']
+    logout(request)
     return redirect('landing_page')
 
 def get_student_dashboard_context(student):
