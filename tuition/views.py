@@ -333,7 +333,7 @@ def teacher_login_view(request):
             messages.error(request, 'Invalid Username or Password.')
     return render(request, 'tuition/teacher_login.html')
 
-@login_required(login_url='teacher_login')
+
 def teacher_logout_view(request):
     logout(request)
     return redirect('landing_page')
@@ -353,7 +353,7 @@ def admin_login_view(request):
             messages.error(request, 'Invalid Username or Password.')
     return render(request, 'tuition/admin_login.html')
 
-@login_required(login_url='admin_login')
+
 def admin_logout_view(request):
     logout(request)
     return redirect('landing_page')
