@@ -12,6 +12,7 @@
         <p class="text-gray-500 font-medium text-sm sm:text-base">ROOT Tuition ആപ്ലിക്കേഷൻ ഉപയോഗിക്കുന്നതിനായുള്ള വിശദമായ വിവരങ്ങൾ താഴെ നൽകുന്നു.</p>
     </div>
 
+    {% if show_parent and show_admin %}
     <!-- Quick Navigation Tabs -->
     <div class="flex justify-center gap-4">
         <a href="#parent-guide" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-bold shadow-sm transition">
@@ -21,7 +22,9 @@
             അഡ്മിൻമാർക്ക് (Admins)
         </a>
     </div>
+    {% endif %}
 
+    {% if show_parent %}
     <!-- PARENT GUIDE SECTION -->
     <div id="parent-guide" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6 scroll-mt-20">
         <div class="border-b border-gray-100 pb-4 flex items-center gap-3">
@@ -74,7 +77,9 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
+    {% if show_admin %}
     <!-- ADMIN GUIDE SECTION -->
     <div id="admin-guide" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6 scroll-mt-20">
         <div class="border-b border-gray-100 pb-4 flex items-center gap-3">
@@ -127,5 +132,6 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}

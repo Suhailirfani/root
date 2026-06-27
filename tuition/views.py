@@ -1687,6 +1687,20 @@ def parent_fee_details_view(request):
 
 
 def guidelines_view(request):
-    return render(request, 'tuition/guidelines.html')
+    show_parent = False
+    show_admin = False
+    
+    if 'logged_in_student' in request.session:
+        show_parent = True
+    elif request.user.is_authenticated:
+        show_admin = True
+    else:
+        # Default fallback
+        show_parent = True
+        
+    return render(request, 'tuition/guidelines.html', {
+        'show_parent': show_parent,
+        'show_admin': show_admin
+    })
 
 
