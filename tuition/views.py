@@ -15,6 +15,7 @@ import json
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import get_template
 from io import BytesIO
+from decimal import Decimal
 try:
     from xhtml2pdf import pisa
 except ImportError:
@@ -193,6 +194,11 @@ def get_student_dashboard_context(student):
     working_days = WorkingDay.objects.all()
     working_days_dict = {wd.date.strftime('%Y-%m-%d'): wd.is_working_day for wd in working_days}
 
+    # 8. Fees Overview
+    total_fixed_fee = StudentFee.objects.filter(student=student).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+    total_fee_paid = FeePayment.objects.filter(student=student).aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')
+    fee_balance_due = total_fixed_fee - total_fee_paid
+
     return {
         'student': student,
         'attendance_percentage': attendance_percentage,
@@ -208,7 +214,9 @@ def get_student_dashboard_context(student):
         'leaderboard': leaderboard_data,
         'upcoming_exams': upcoming_exams,
         'today_tasks': today_tasks,
+        'fee_balance_due': fee_balance_due,
     }
+
 
 def parent_dashboard_view(request):
     student_id = request.session.get('logged_in_student')
@@ -1482,3 +1490,198 @@ def admin_delete_centre_view(request, centre_id):
         centre.delete()
         messages.success(request, 'Centre deleted successfully.')
     return redirect('admin_centres')
+
+
+# --- Fee Management Views ---
+import calendar
+from .models import StudentFee, FeePayment
+
+@login_required(login_url='admin_login')
+@user_passes_test(is_admin)
+def admin_student_fees_view(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    active_centre = get_admin_centre(request)
+
+    if active_centre and student.class_group.centre != active_centre:
+        messages.error(request, 'You do not have permission to manage fees for this student.')
+        return redirect('admin_students')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'fix_fee':
+            month = int(request.POST.get('month', 1))
+            year = int(request.POST.get('year', timezone.now().year))
+            amount = Decimal(request.POST.get('amount') or '0.00')
+            try:
+                StudentFee.objects.update_or_create(
+                    student=student, month=month, year=year,
+                    defaults={'amount': amount}
+                )
+                messages.success(request, f'Fixed monthly fee for {calendar.month_name[month]} {year} set to ₹{amount}.')
+            except Exception as e:
+                messages.error(request, f'Failed to fix monthly fee: {e}')
+                
+        elif action == 'record_payment':
+            month = int(request.POST.get('month', 1))
+            year = int(request.POST.get('year', timezone.now().year))
+            amount_paid = Decimal(request.POST.get('amount_paid') or '0.00')
+            payment_date = request.POST.get('payment_date') or timezone.now().date()
+            payment_method = request.POST.get('payment_method', 'Cash')
+            remarks = request.POST.get('remarks', '')
+            try:
+                FeePayment.objects.create(
+                    student=student, month=month, year=year,
+                    amount_paid=amount_paid, payment_date=payment_date,
+                    payment_method=payment_method, remarks=remarks
+                )
+                messages.success(request, f'Payment of ₹{amount_paid} recorded for {calendar.month_name[month]} {year}.')
+            except Exception as e:
+                messages.error(request, f'Failed to record payment: {e}')
+                
+        elif action == 'delete_fee':
+            fee_id = request.POST.get('fee_id')
+            fee = get_object_or_404(StudentFee, id=fee_id, student=student)
+            month_name = calendar.month_name[fee.month]
+            year_val = fee.year
+            fee.delete()
+            messages.success(request, f'Fixed fee for {month_name} {year_val} deleted.')
+            
+        elif action == 'delete_payment':
+            payment_id = request.POST.get('payment_id')
+            payment = get_object_or_404(FeePayment, id=payment_id, student=student)
+            payment.delete()
+            messages.success(request, 'Payment transaction successfully revoked.')
+            
+        return redirect('admin_student_fees', student_id=student.id)
+
+    # Fetch fee and payment history
+    assigned_fees = StudentFee.objects.filter(student=student).order_by('-year', '-month')
+    payments = FeePayment.objects.filter(student=student).order_by('-payment_date', '-created_at')
+
+    # Calculate monthly summary
+    months_keys = set()
+    for fee in assigned_fees:
+        months_keys.add((fee.month, fee.year))
+    for pmt in payments:
+        months_keys.add((pmt.month, pmt.year))
+
+    monthly_summary = []
+    for month, year in months_keys:
+        fee_obj = assigned_fees.filter(month=month, year=year).first()
+        fixed_amount = fee_obj.amount if fee_obj else Decimal('0.00')
+        
+        pmts = payments.filter(month=month, year=year)
+        total_paid_for_month = pmts.aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')
+        due_amount = fixed_amount - total_paid_for_month
+        
+        if fixed_amount == 0:
+            status = 'Extra Payment'
+        elif due_amount <= 0:
+            status = 'Paid'
+        elif total_paid_for_month == 0:
+            status = 'Unpaid'
+        else:
+            status = 'Partially Paid'
+            
+        monthly_summary.append({
+            'month': month,
+            'year': year,
+            'month_name': calendar.month_name[month],
+            'fixed_amount': fixed_amount,
+            'total_paid': total_paid_for_month,
+            'due_amount': due_amount,
+            'status': status,
+            'fee_id': fee_obj.id if fee_obj else None
+        })
+
+    # Sort summary descending by year and month
+    monthly_summary.sort(key=lambda x: (x['year'], x['month']), reverse=True)
+
+    # Global metrics
+    total_fixed = assigned_fees.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+    total_paid = payments.aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')
+    total_due = total_fixed - total_paid
+
+    # Selection lists
+    months_list = [{'value': i, 'name': calendar.month_name[i]} for i in range(1, 13)]
+    current_year = timezone.now().year
+    years_list = range(current_year - 1, current_year + 3)
+
+    return render(request, 'tuition/admin_student_fees.html', {
+        'student': student,
+        'assigned_fees': assigned_fees,
+        'payments': payments,
+        'monthly_summary': monthly_summary,
+        'total_fixed': total_fixed,
+        'total_paid': total_paid,
+        'total_due': total_due,
+        'months_list': months_list,
+        'years_list': years_list,
+        'active_centre': active_centre,
+    })
+
+
+def parent_fee_details_view(request):
+    student_id = request.session.get('logged_in_student')
+    if not student_id:
+        return redirect('parent_login')
+        
+    student = get_object_or_404(Student, id=student_id)
+    
+    # Fetch fee and payment history
+    assigned_fees = StudentFee.objects.filter(student=student).order_by('-year', '-month')
+    payments = FeePayment.objects.filter(student=student).order_by('-payment_date', '-created_at')
+
+    # Calculate monthly summary
+    months_keys = set()
+    for fee in assigned_fees:
+        months_keys.add((fee.month, fee.year))
+    for pmt in payments:
+        months_keys.add((pmt.month, pmt.year))
+
+    monthly_summary = []
+    for month, year in months_keys:
+        fee_obj = assigned_fees.filter(month=month, year=year).first()
+        fixed_amount = fee_obj.amount if fee_obj else Decimal('0.00')
+        
+        pmts = payments.filter(month=month, year=year)
+        total_paid_for_month = pmts.aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')
+        due_amount = fixed_amount - total_paid_for_month
+        
+        if fixed_amount == 0:
+            status = 'Extra Payment'
+        elif due_amount <= 0:
+            status = 'Paid'
+        elif total_paid_for_month == 0:
+            status = 'Unpaid'
+        else:
+            status = 'Partially Paid'
+            
+        monthly_summary.append({
+            'month': month,
+            'year': year,
+            'month_name': calendar.month_name[month],
+            'fixed_amount': fixed_amount,
+            'total_paid': total_paid_for_month,
+            'due_amount': due_amount,
+            'status': status
+        })
+
+    # Sort summary descending by year and month
+    monthly_summary.sort(key=lambda x: (x['year'], x['month']), reverse=True)
+
+    # Global metrics
+    total_fixed = assigned_fees.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+    total_paid = payments.aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')
+    total_due = total_fixed - total_paid
+
+    return render(request, 'tuition/parent_fee_details.html', {
+        'student': student,
+        'payments': payments,
+        'monthly_summary': monthly_summary,
+        'total_fixed': total_fixed,
+        'total_paid': total_paid,
+        'total_due': total_due,
+    })
+

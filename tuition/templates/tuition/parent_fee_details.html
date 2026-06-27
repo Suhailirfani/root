@@ -1,0 +1,154 @@
+{% extends 'tuition/base.html' %}
+{% load static %}
+
+{% block title %}Fee Details - {{ student.full_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-slate-50 min-h-screen">
+    
+    <!-- Top Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <a href="{% url 'parent_dashboard' %}" class="text-sm font-semibold text-brand-600 hover:text-brand-500 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Dashboard
+            </a>
+            <h1 class="text-2xl font-bold text-gray-900 mt-2">Detailed Fee Statement</h1>
+            <p class="text-gray-500 font-medium">Student Name: <span class="text-gray-900 font-bold">{{ student.full_name }}</span> (ID: {{ student.student_id }})</p>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Total Fixed -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-400 uppercase tracking-wider">Total Fixed Fee</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">₹{{ total_fixed|floatformat:2 }}</p>
+            </div>
+            <div class="p-3 bg-brand-50 text-brand-600 rounded-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Total Paid -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-400 uppercase tracking-wider">Total Paid Fee</p>
+                <p class="text-3xl font-bold text-green-600 mt-1">₹{{ total_paid|floatformat:2 }}</p>
+            </div>
+            <div class="p-3 bg-green-50 text-green-600 rounded-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Balance Due -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-400 uppercase tracking-wider">Balance Due</p>
+                <p class="text-3xl font-bold {% if total_due > 0 %}text-red-600{% else %}text-emerald-600{% endif %} mt-1">₹{{ total_due|floatformat:2 }}</p>
+            </div>
+            <div class="p-3 {% if total_due > 0 %}bg-red-50 text-red-600{% else %}bg-emerald-50 text-emerald-600{% endif %} rounded-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Month breakdown card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-100">
+                <h2 class="text-lg font-bold text-gray-900">Month-Wise Fee Summary</h2>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-100">
+                    <thead>
+                        <tr class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left">Month</th>
+                            <th class="px-6 py-3 text-left">Fixed Fee</th>
+                            <th class="px-6 py-3 text-left">Amount Paid</th>
+                            <th class="px-6 py-3 text-left">Due</th>
+                            <th class="px-6 py-3 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50 text-sm">
+                        {% for row in monthly_summary %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 font-semibold text-gray-900">{{ row.month_name }} {{ row.year }}</td>
+                            <td class="px-6 py-4 text-gray-600">₹{{ row.fixed_amount|floatformat:2 }}</td>
+                            <td class="px-6 py-4 text-green-600 font-medium">₹{{ row.total_paid|floatformat:2 }}</td>
+                            <td class="px-6 py-4 font-bold {% if row.due_amount > 0 %}text-red-600{% else %}text-emerald-600{% endif %}">
+                                ₹{{ row.due_amount|floatformat:2 }}
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold
+                                    {% if row.status == 'Paid' %}bg-green-50 text-green-700 border border-green-200
+                                    {% elif row.status == 'Unpaid' %}bg-red-50 text-red-700 border border-red-200
+                                    {% elif row.status == 'Partially Paid' %}bg-yellow-50 text-yellow-700 border border-yellow-200
+                                    {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+                                    {{ row.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-400">No monthly fee records or transactions found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payment History Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-100">
+                <h2 class="text-lg font-bold text-gray-900">Payment Transaction Log</h2>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-100">
+                    <thead>
+                        <tr class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left">Date</th>
+                            <th class="px-6 py-3 text-left">For Month</th>
+                            <th class="px-6 py-3 text-left">Amount Paid</th>
+                            <th class="px-6 py-3 text-left">Method</th>
+                            <th class="px-6 py-3 text-left">Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50 text-sm">
+                        {% for p in payments %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 text-gray-600 whitespace-nowrap">{{ p.payment_date|date:"d-M-Y" }}</td>
+                            <td class="px-6 py-4 font-semibold text-gray-800">{{ p.month }}/{{ p.year }}</td>
+                            <td class="px-6 py-4 text-green-600 font-bold">₹{{ p.amount_paid|floatformat:2 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-medium text-xs">{{ p.payment_method }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500 max-w-[150px] truncate" title="{{ p.remarks }}">{{ p.remarks|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-400">No payment transactions have been logged.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

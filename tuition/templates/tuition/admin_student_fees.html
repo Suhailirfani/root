@@ -1,0 +1,327 @@
+{% extends 'tuition/base.html' %}
+{% load static %}
+
+{% block title %}Manage Fees - {{ student.full_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Top Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3">
+                <a href="{% url 'admin_students' %}" class="text-sm font-semibold text-brand-600 hover:text-brand-500 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Students
+                </a>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 mt-2">Manage Student Fees</h1>
+            <p class="text-gray-500 font-medium">Student: <span class="text-gray-900 font-bold">{{ student.full_name }}</span> (ID: {{ student.student_id }}) &bull; Class: {{ student.class_group.name }}</p>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    {% if messages %}
+    <div class="space-y-2">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl text-sm font-semibold {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200{% elif message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Metrics Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Total Fixed -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-400 uppercase tracking-wider">Total Fixed Fee</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">₹{{ total_fixed|floatformat:2 }}</p>
+            </div>
+            <div class="p-3 bg-brand-50 text-brand-600 rounded-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Total Paid -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-400 uppercase tracking-wider">Total Paid</p>
+                <p class="text-3xl font-bold text-green-600 mt-1">₹{{ total_paid|floatformat:2 }}</p>
+            </div>
+            <div class="p-3 bg-green-50 text-green-600 rounded-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Balance Due -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-400 uppercase tracking-wider">Balance Due</p>
+                <p class="text-3xl font-bold {% if total_due > 0 %}text-red-600{% else %}text-emerald-600{% endif %} mt-1">₹{{ total_due|floatformat:2 }}</p>
+            </div>
+            <div class="p-3 {% if total_due > 0 %}bg-red-50 text-red-600{% else %}bg-emerald-50 text-emerald-600{% endif %} rounded-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Forms Panel (Left Column) -->
+        <div class="space-y-6">
+            <!-- Form 1: Fix Monthly Fee -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Fix Monthly Fee
+                </h2>
+                <form method="POST" action="" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="fix_fee">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="fee_month" class="block text-xs font-bold text-gray-400 uppercase mb-1">Month</label>
+                            <select id="fee_month" name="month" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2 px-3">
+                                {% for m in months_list %}
+                                    <option value="{{ m.value }}" {% if m.value == timezone.now.month %}selected{% endif %}>{{ m.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="fee_year" class="block text-xs font-bold text-gray-400 uppercase mb-1">Year</label>
+                            <select id="fee_year" name="year" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2 px-3">
+                                {% for y in years_list %}
+                                    <option value="{{ y }}" {% if y == timezone.now.year %}selected{% endif %}>{{ y }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="fee_amount" class="block text-xs font-bold text-gray-400 uppercase mb-1">Fee Amount (₹)</label>
+                        <input type="number" id="fee_amount" name="amount" step="0.01" min="0" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2 px-3" placeholder="e.g. 1500">
+                    </div>
+
+                    <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none transition-colors cursor-pointer">
+                        Fix Fee Amount
+                    </button>
+                </form>
+            </div>
+
+            <!-- Form 2: Fee Collection Form -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Fee Collection Form
+                </h2>
+                <form method="POST" action="" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="record_payment">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="pay_month" class="block text-xs font-bold text-gray-400 uppercase mb-1">Target Month</label>
+                            <select id="pay_month" name="month" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2 px-3">
+                                {% for m in months_list %}
+                                    <option value="{{ m.value }}" {% if m.value == timezone.now.month %}selected{% endif %}>{{ m.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pay_year" class="block text-xs font-bold text-gray-400 uppercase mb-1">Target Year</label>
+                            <select id="pay_year" name="year" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2 px-3">
+                                {% for y in years_list %}
+                                    <option value="{{ y }}" {% if y == timezone.now.year %}selected{% endif %}>{{ y }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="amount_paid" class="block text-xs font-bold text-gray-400 uppercase mb-1">Amount Paid (₹)</label>
+                        <input type="number" id="amount_paid" name="amount_paid" step="0.01" min="0.01" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2 px-3" placeholder="e.g. 1000">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="payment_date" class="block text-xs font-bold text-gray-400 uppercase mb-1">Payment Date</label>
+                            <input type="date" id="payment_date" name="payment_date" value="{{ timezone.now|date:'Y-m-d' }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2 px-3">
+                        </div>
+                        <div>
+                            <label for="payment_method" class="block text-xs font-bold text-gray-400 uppercase mb-1">Method</label>
+                            <select id="payment_method" name="payment_method" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2 px-3">
+                                <option value="Cash">Cash</option>
+                                <option value="UPI">UPI</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Card">Card</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="remarks" class="block text-xs font-bold text-gray-400 uppercase mb-1">Remarks</label>
+                        <input type="text" id="remarks" name="remarks" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2 px-3" placeholder="e.g. Paid by father">
+                    </div>
+
+                    <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-colors cursor-pointer">
+                        Collect Payment
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Month Summary & Payment History List (Right Columns) -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Monthly Fee Summary Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-base font-bold text-gray-900">Month-Wise Fee Summary</h3>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-100">
+                        <thead>
+                            <tr class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left">Month</th>
+                                <th class="px-6 py-3 text-left">Fixed Fee</th>
+                                <th class="px-6 py-3 text-left">Paid</th>
+                                <th class="px-6 py-3 text-left">Due</th>
+                                <th class="px-6 py-3 text-center">Status</th>
+                                <th class="px-6 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 text-sm">
+                            {% for row in monthly_summary %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 font-semibold text-gray-900">{{ row.month_name }} {{ row.year }}</td>
+                                <td class="px-6 py-4 text-gray-600">₹{{ row.fixed_amount|floatformat:2 }}</td>
+                                <td class="px-6 py-4 text-green-600 font-medium">₹{{ row.total_paid|floatformat:2 }}</td>
+                                <td class="px-6 py-4 font-bold {% if row.due_amount > 0 %}text-red-600{% else %}text-emerald-600{% endif %}">
+                                    ₹{{ row.due_amount|floatformat:2 }}
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold
+                                        {% if row.status == 'Paid' %}bg-green-50 text-green-700 border border-green-200
+                                        {% elif row.status == 'Unpaid' %}bg-red-50 text-red-700 border border-red-200
+                                        {% elif row.status == 'Partially Paid' %}bg-yellow-50 text-yellow-700 border border-yellow-200
+                                        {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+                                        {{ row.status }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right flex justify-end gap-3">
+                                    <!-- Record Payment Shortcut link -->
+                                    <button type="button" onclick="prefillPayment({{ row.month }}, {{ row.year }}, {{ row.due_amount }})" class="text-xs text-brand-600 hover:text-brand-900 font-bold cursor-pointer">
+                                        Collect
+                                    </button>
+                                    
+                                    {% if row.fee_id %}
+                                    <form method="POST" action="" class="inline" onsubmit="return confirm('Remove fixed fee configuration for {{ row.month_name }} {{ row.year }}?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_fee">
+                                        <input type="hidden" name="fee_id" value="{{ row.fee_id }}">
+                                        <button type="submit" class="text-xs text-red-500 hover:text-red-800 cursor-pointer">
+                                            Remove
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-400">No monthly fees have been fixed or payments recorded.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Detailed Payment Transaction History -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-100">
+                    <h3 class="text-base font-bold text-gray-900">Payment Transactions Log</h3>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-100">
+                        <thead>
+                            <tr class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left">Date</th>
+                                <th class="px-6 py-3 text-left">For Month</th>
+                                <th class="px-6 py-3 text-left">Amount</th>
+                                <th class="px-6 py-3 text-left">Method</th>
+                                <th class="px-6 py-3 text-left">Remarks</th>
+                                <th class="px-6 py-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 text-sm">
+                            {% for p in payments %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 text-gray-600 whitespace-nowrap">{{ p.payment_date|date:"d-M-Y" }}</td>
+                                <td class="px-6 py-4 font-semibold text-gray-800">{{ p.month }}/{{ p.year }}</td>
+                                <td class="px-6 py-4 text-green-600 font-bold">₹{{ p.amount_paid|floatformat:2 }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-medium text-xs">{{ p.payment_method }}</span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-500 max-w-[200px] truncate" title="{{ p.remarks }}">{{ p.remarks|default:"-" }}</td>
+                                <td class="px-6 py-4 text-right">
+                                    <form method="POST" action="" class="inline" onsubmit="return confirm('Are you sure you want to revoke this payment transaction? This will restore the due balance for this month.');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_payment">
+                                        <input type="hidden" name="payment_id" value="{{ p.id }}">
+                                        <button type="submit" class="text-red-500 hover:text-red-800 transition-colors cursor-pointer text-xs font-bold">
+                                            Revoke
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-400">No payment transactions have been logged yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function prefillPayment(month, year, dueAmount) {
+        document.getElementById('pay_month').value = month;
+        document.getElementById('pay_year').value = year;
+        
+        // Only prefill positive dues, otherwise clear or set to empty
+        if (dueAmount > 0) {
+            document.getElementById('amount_paid').value = parseFloat(dueAmount).toFixed(2);
+        } else {
+            document.getElementById('amount_paid').value = '';
+        }
+        
+        // Scroll collection form into view
+        document.getElementById('amount_paid').focus();
+    }
+</script>
+{% endblock %}

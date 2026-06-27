@@ -28,6 +28,22 @@
                     {{ attendance_percentage|floatformat:1 }}%
                 </p>
             </div>
+            
+            <!-- Fee Details Card -->
+            {% if is_teacher_viewing %}
+            <a href="{% url 'admin_student_fees' student.id %}" class="bg-gradient-to-br from-rose-50 to-white border border-rose-100 hover:border-rose-300 hover:shadow-md transition-all px-6 py-4 rounded-xl text-center shadow-sm min-w-[130px] block cursor-pointer group">
+            {% else %}
+            <a href="{% url 'parent_fee_details' %}" class="bg-gradient-to-br from-rose-50 to-white border border-rose-100 hover:border-rose-300 hover:shadow-md transition-all px-6 py-4 rounded-xl text-center shadow-sm min-w-[130px] block cursor-pointer group">
+            {% endif %}
+                <p class="text-sm font-medium text-gray-500 mb-1 group-hover:text-rose-600 transition-colors">Pending Fee</p>
+                <p class="text-3xl font-bold {% if fee_balance_due > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                    ₹{{ fee_balance_due|floatformat:0 }}
+                </p>
+                <p class="text-[10px] text-gray-400 mt-1 font-bold uppercase tracking-wider group-hover:underline">
+                    {% if is_teacher_viewing %}Manage Fees{% else %}Detailed History{% endif %}
+                </p>
+            </a>
+
             <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 px-5 py-4 rounded-xl text-center shadow-sm min-w-[120px] flex flex-col items-center justify-center">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Today's Status</p>
                 {% if today_status == 'present' %}
@@ -329,10 +345,10 @@
                 </div>
                 
                 <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
-                    <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-green-500"></div><span class="text-[10px] text-gray-500 font-bold uppercase">Present</span></div>
-                    <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-red-500"></div><span class="text-[10px] text-gray-500 font-bold uppercase">Absent</span></div>
-                    <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-orange-500"></div><span class="text-[10px] text-gray-500 font-bold uppercase">Late</span></div>
-                    <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-yellow-400"></div><span class="text-[10px] text-gray-500 font-bold uppercase">Holiday</span></div>
+                    <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div><span class="text-[10px] text-gray-500 font-bold uppercase">Present</span></div>
+                    <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-rose-600"></div><span class="text-[10px] text-gray-500 font-bold uppercase">Absent</span></div>
+                    <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-500 font-bold uppercase">Late</span></div>
+                    <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-indigo-600"></div><span class="text-[10px] text-gray-500 font-bold uppercase">Holiday</span></div>
                 </div>
             </div>
 
@@ -517,13 +533,13 @@
             const isWorkingDay = workingDaysData[dateStr];
             
             if (attStatus === 'present') {
-                bgColor = 'bg-green-100 text-green-800 font-bold';
+                bgColor = 'bg-emerald-100 text-emerald-800 font-bold border border-emerald-200';
             } else if (attStatus === 'absent') {
-                bgColor = 'bg-red-100 text-red-800 font-bold';
+                bgColor = 'bg-rose-600 text-white font-bold shadow-sm';
             } else if (attStatus === 'late') {
-                bgColor = 'bg-orange-100 text-orange-800 font-bold';
+                bgColor = 'bg-amber-300 text-amber-950 font-bold border border-amber-400';
             } else if (isWorkingDay === false) {
-                bgColor = 'bg-yellow-100 text-yellow-800';
+                bgColor = 'bg-indigo-600 text-white font-bold shadow-sm';
             }
             
             const classes = bgColor.split(' ');

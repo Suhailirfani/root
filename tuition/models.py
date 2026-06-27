@@ -187,3 +187,39 @@ class HomeTaskCompletion(models.Model):
 
     def __str__(self):
         return f"{self.student} - {self.task.title} - Completed at {self.completed_at}"
+
+
+class StudentFee(models.Model):
+    """Represents a fixed monthly fee assigned to a student for a specific month/year"""
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='assigned_fees')
+    month = models.PositiveIntegerField(help_text="1 to 12")
+    year = models.PositiveIntegerField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [['student', 'month', 'year']]
+        ordering = ['-year', '-month', 'student']
+
+    def __str__(self):
+        return f"{self.student} - {self.month}/{self.year} - {self.amount}"
+
+
+class FeePayment(models.Model):
+    """Represents a payment made by the parent/student for a specific month/year"""
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='payments')
+    month = models.PositiveIntegerField(help_text="1 to 12")
+    year = models.PositiveIntegerField()
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_date = models.DateField(default=timezone.now)
+    payment_method = models.CharField(max_length=50, blank=True, help_text="e.g. Cash, Card, UPI, Online")
+    remarks = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-payment_date', '-created_at']
+
+    def __str__(self):
+        return f"{self.student} - Paid {self.amount_paid} for {self.month}/{self.year} on {self.payment_date}"
+

@@ -52,4 +52,9 @@ urlpatterns = [
     path('portal/centres/<int:centre_id>/edit/', views.admin_edit_centre_view, name='admin_edit_centre'),
     path('portal/centres/<int:centre_id>/delete/', views.admin_delete_centre_view, name='admin_delete_centre'),
     path('portal/switch-centre/<int:centre_id>/', views.admin_switch_centre_view, name='admin_switch_centre'),
+
+    # Fee Management URLs
+    path('portal/students/<int:student_id>/fees/', views.admin_student_fees_view, name='admin_student_fees'),
+    path('dashboard/fees/', views.parent_fee_details_view, name='parent_fee_details'),
 ]
+
