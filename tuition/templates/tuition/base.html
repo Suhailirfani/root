@@ -61,6 +61,7 @@
                 <div class="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
                     {% if request.session.logged_in_student %}
                         <a href="{% url 'parent_dashboard' %}" class="text-brand-600 hover:text-brand-500 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors">Dashboard</a>
+                        <a href="{% url 'guidelines' %}" class="text-gray-500 hover:text-gray-900 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors">നിർദ്ദേശങ്ങൾ (Help)</a>
                         <a href="{% url 'parent_logout' %}" class="text-gray-500 hover:text-gray-900 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors">Parent Logout</a>
                     {% elif request.user.is_authenticated %}
                         {% if is_global_admin %}
@@ -115,9 +116,11 @@
 
                         {% if request.user.is_superuser or request.user.profile.role == 'admin' %}
                             <a href="{% url 'admin_dashboard' %}" class="text-brand-600 hover:text-brand-500 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors">Dashboard</a>
+                            <a href="{% url 'guidelines' %}" class="text-gray-500 hover:text-gray-900 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors">നിർദ്ദേശങ്ങൾ (Help)</a>
                             <a href="{% url 'admin_logout' %}" class="text-gray-500 hover:text-gray-900 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap">Logout ({{ request.user.username }})</a>
                         {% else %}
                             <a href="{% url 'teacher_dashboard' %}" class="text-brand-600 hover:text-brand-500 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors">Dashboard</a>
+                            <a href="{% url 'guidelines' %}" class="text-gray-500 hover:text-gray-900 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors">നിർദ്ദേശങ്ങൾ (Help)</a>
                             <a href="{% url 'teacher_logout' %}" class="text-gray-500 hover:text-gray-900 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap">Logout ({{ request.user.username }})</a>
                         {% endif %}
                     {% endif %}

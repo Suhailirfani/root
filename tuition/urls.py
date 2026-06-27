@@ -56,5 +56,6 @@ urlpatterns = [
     # Fee Management URLs
     path('portal/students/<int:student_id>/fees/', views.admin_student_fees_view, name='admin_student_fees'),
     path('dashboard/fees/', views.parent_fee_details_view, name='parent_fee_details'),
+    path('guidelines/', views.guidelines_view, name='guidelines'),
 ]
 

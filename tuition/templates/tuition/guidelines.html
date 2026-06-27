@@ -1,0 +1,131 @@
+{% extends 'tuition/base.html' %}
+{% load static %}
+
+{% block title %}ഉപയോഗ നിർദ്ദേശങ്ങൾ - ROOT Tuition{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-slate-50 min-h-screen">
+    
+    <!-- Header -->
+    <div class="text-center space-y-2">
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">ഉപയോഗ നിർദ്ദേശങ്ങൾ (User Guidelines)</h1>
+        <p class="text-gray-500 font-medium text-sm sm:text-base">ROOT Tuition ആപ്ലിക്കേഷൻ ഉപയോഗിക്കുന്നതിനായുള്ള വിശദമായ വിവരങ്ങൾ താഴെ നൽകുന്നു.</p>
+    </div>
+
+    <!-- Quick Navigation Tabs -->
+    <div class="flex justify-center gap-4">
+        <a href="#parent-guide" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-bold shadow-sm transition">
+            രക്ഷാകർത്താക്കൾക്ക് (Parents)
+        </a>
+        <a href="#admin-guide" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-sm transition">
+            അഡ്മിൻമാർക്ക് (Admins)
+        </a>
+    </div>
+
+    <!-- PARENT GUIDE SECTION -->
+    <div id="parent-guide" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6 scroll-mt-20">
+        <div class="border-b border-gray-100 pb-4 flex items-center gap-3">
+            <span class="p-3 bg-brand-100 text-brand-600 rounded-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </span>
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">രക്ഷാകർത്താക്കൾക്കുള്ള സഹായി (Parent Guide)</h2>
+                <p class="text-gray-400 text-xs font-semibold">ലോഗിൻ ചെയ്യുന്നതിനും കുട്ടികളുടെ വിവരങ്ങൾ പരിശോധിക്കുന്നതിനും</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Parent Step 1 -->
+            <div class="p-5 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+                <span class="inline-block px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-bold uppercase">ഘട്ടം 1</span>
+                <h3 class="font-bold text-gray-900">ലോഗിൻ ചെയ്യുക (Login)</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    നിങ്ങളുടെ കുട്ടിയുടെ **Student ID**, കൂടാതെ മുൻപ് ലഭിച്ചിട്ടുള്ള **4 അക്ക PIN** നമ്പർ എന്നിവ ഉപയോഗിച്ച് പേരന്റ് പോർട്ടലിൽ ലോഗിൻ ചെയ്യുക.
+                </p>
+            </div>
+
+            <!-- Parent Step 2 -->
+            <div class="p-5 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+                <span class="inline-block px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-bold uppercase">ഘട്ടം 2</span>
+                <h3 class="font-bold text-gray-900">ഫീസ് വിവരങ്ങൾ പരിശോധിക്കുക</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    ഡാഷ്‌ബോർഡിലെ **'Pending Fee'** എന്ന കാർഡിൽ അടയ്ക്കാനുള്ള ഫീസിന്റെ ബാക്കി തുക കാണാം. വിശദമായ വിവരങ്ങൾ കാണാൻ ഈ കാർഡിൽ ക്ലിക്ക് ചെയ്യുക.
+                </p>
+            </div>
+
+            <!-- Parent Step 3 -->
+            <div class="p-5 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+                <span class="inline-block px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-bold uppercase">ഘട്ടം 3</span>
+                <h3 class="font-bold text-gray-900">ഫീസ് രസീതുകൾ പരിശോധിക്കുക</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    ഫീസ് പേജിലെ **'Payment Transaction Log'** വഴി നിങ്ങൾ മുൻപ് അടച്ച പണം ഏത് തീയതിയിലാണ് അടച്ചതെന്നും ഏത് മാസം വരെയുള്ളതാണെന്നും ഉള്ള വിവരങ്ങൾ കാണാം.
+                </p>
+            </div>
+
+            <!-- Parent Step 4 -->
+            <div class="p-5 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+                <span class="inline-block px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-bold uppercase">ഘട്ടം 4</span>
+                <h3 class="font-bold text-gray-900">ഗൃഹപാഠം പൂർത്തിയാക്കിയത് അടയാളപ്പെടുത്തുക</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    ഡാഷ്‌ബോർഡിൽ തന്നിരിക്കുന്ന ഇന്നത്തെ ഗൃഹപാഠം പൂർത്തിയാക്കിയ ശേഷം **'പൂർത്തിയായി അടയാളപ്പെടുത്തുക' (Complete)** എന്ന ബട്ടൺ അമർത്തി വിവരങ്ങൾ അപ്ഡേറ്റ് ചെയ്യുക.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN GUIDE SECTION -->
+    <div id="admin-guide" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6 scroll-mt-20">
+        <div class="border-b border-gray-100 pb-4 flex items-center gap-3">
+            <span class="p-3 bg-indigo-100 text-indigo-600 rounded-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+            </span>
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">അഡ്മിൻമാർക്കുള്ള സഹായി (Admin Guide)</h2>
+                <p class="text-gray-400 text-xs font-semibold">പ്രതിമാസ ഫീസ് നിശ്ചയിക്കുന്നതിനും പെയ്‌മെന്റുകൾ രേഖപ്പെടുത്തുന്നതിനും</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Admin Step 1 -->
+            <div class="p-5 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+                <span class="inline-block px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold uppercase">ഘട്ടം 1</span>
+                <h3 class="font-bold text-gray-900">വിദ്യാർത്ഥിയുടെ ഫീസ് പോർട്ടലിൽ പ്രവേശിക്കുക</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    **Manage Students** ലിസ്റ്റിലെ ഓരോ വിദ്യാർത്ഥിയുടെയും നേർക്കുള്ള പച്ച നിറത്തിലുള്ള **'Fees'** എന്ന ലിങ്ക് ക്ലിക്ക് ചെയ്യുക.
+                </p>
+            </div>
+
+            <!-- Admin Step 2 -->
+            <div class="p-5 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+                <span class="inline-block px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold uppercase">ഘട്ടം 2</span>
+                <h3 class="font-bold text-gray-900">പ്രതിമാസ ഫീസ് നിശ്ചയിക്കുക (Fix Monthly Fee)</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    ഇടത് ഭാഗത്തുള്ള **'Fix Monthly Fee'** ഫോമിൽ വർഷവും മാസവും ഫീസ് തുകയും നൽകി സബ്മിറ്റ് ചെയ്യുക. ഇത് ആ മാസത്തെ വിദ്യാർത്ഥിയുടെ കുടിശ്ശികയായി രേഖപ്പെടുത്തപ്പെടും.
+                </p>
+            </div>
+
+            <!-- Admin Step 3 -->
+            <div class="p-5 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+                <span class="inline-block px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold uppercase">ഘട്ടം 3</span>
+                <h3 class="font-bold text-gray-900">ഫീസ് പെയ്‌മെന്റ് രേഖപ്പെടുത്തുക (Record Payment)</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    മാസവും അടച്ച തുകയും തീയതിയും നൽകി പെയ്‌മെന്റ് സേവ് ചെയ്യുക. തുക ലഭിച്ച ശേഷം എളുപ്പത്തിൽ ചെയ്യാനായി മാസ സംഗ്രഹ പട്ടികയിലെ **'Collect'** ബട്ടൺ ഉപയോഗിക്കാം.
+                </p>
+            </div>
+
+            <!-- Admin Step 4 -->
+            <div class="p-5 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+                <span class="inline-block px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold uppercase">ഘട്ടം 4</span>
+                <h3 class="font-bold text-gray-900">തെറ്റായ രേഖപ്പെടുത്തലുകൾ റദ്ദാക്കുക (Revoke Payment)</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    ഫീസ് വഴിതെറ്റി രേഖപ്പെടുത്തിയാൽ പേജിന് താഴെയുള്ള **'Payment Transactions Log'** പട്ടികയിൽ നിന്നും ആവശ്യമുള്ള പെയ്മെന്റ് റോയിലെ ചുവന്ന **'Revoke'** ബട്ടൺ അമർത്തി റദ്ദാക്കാവുന്നതാണ്.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

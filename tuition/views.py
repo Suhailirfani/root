@@ -1685,3 +1685,8 @@ def parent_fee_details_view(request):
         'total_due': total_due,
     })
 
+
+def guidelines_view(request):
+    return render(request, 'tuition/guidelines.html')
+
+
