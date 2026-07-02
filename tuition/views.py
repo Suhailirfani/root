@@ -25,11 +25,14 @@ def generate_pin(length=4):
     return ''.join(random.choices(string.digits, k=length))
 
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 @never_cache
 def landing_page_view(request):
     return render(request, 'tuition/landing.html')
 
+@never_cache
+@ensure_csrf_cookie
 def parent_login_view(request):
     if request.method == 'POST':
         student_id = request.POST.get('student_id')
@@ -326,6 +329,8 @@ def teacher_verify_completion(request, completion_id):
 
 # --- Teacher / Admin Views ---
 
+@never_cache
+@ensure_csrf_cookie
 def teacher_login_view(request):
     if request.method == 'POST':
         u = request.POST.get('username')
@@ -346,6 +351,8 @@ def teacher_logout_view(request):
     logout(request)
     return redirect('landing_page')
 
+@never_cache
+@ensure_csrf_cookie
 def admin_login_view(request):
     if request.method == 'POST':
         u = request.POST.get('username')

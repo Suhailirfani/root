@@ -28,7 +28,18 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Use Network First strategy for all requests to ensure fresh dynamic data
+  // Only handle GET requests to prevent issues with POST form submissions and CSRF
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // Bypass the service worker for login and admin pages to ensure fresh CSRF/session cookies
+  const url = new URL(event.request.url);
+  if (url.pathname.includes('/login/') || url.pathname.includes('/portal/') || url.pathname.includes('/teacher/')) {
+    return;
+  }
+
+  // Use Network First strategy for all other GET requests to ensure fresh dynamic data
   event.respondWith(
     fetch(event.request)
       .then(response => {
