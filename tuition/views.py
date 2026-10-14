@@ -310,9 +310,12 @@ def parent_delete_completion(request, completion_id):
     messages.success(request, "Home task completion removed. You can re-mark it if needed.")
     return redirect('parent_dashboard')
 
+@login_required(login_url='teacher_login')
 def teacher_verify_completion(request, completion_id):
-    """Allow a teacher to verify a student's task completion."""
-    if not hasattr(request.user, 'profile') or request.user.profile.role != 'teacher':
+    """Allow a teacher or admin to verify a student's task completion."""
+    profile = getattr(request.user, 'profile', None)
+    role = getattr(profile, 'role', None)
+    if role not in ['teacher', 'admin'] and not request.user.is_superuser:
         messages.error(request, "Only teachers can verify completions.")
         return redirect('teacher_dashboard')
     completion = get_object_or_404(HomeTaskCompletion, id=completion_id)

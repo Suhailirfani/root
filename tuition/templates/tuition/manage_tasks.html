@@ -105,7 +105,11 @@
                                                 <div>
                                                     {% if comp.verified %}
                                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                            Verified by {{ comp.verified_by.first_name|default:comp.verified_by.username }}
+                                                            {% if comp.verified_by %}
+                                                                Verified by {{ comp.verified_by.first_name|default:comp.verified_by.username }}
+                                                            {% else %}
+                                                                Verified
+                                                            {% endif %}
                                                         </span>
                                                     {% else %}
                                                         <form action="{% url 'teacher_verify_completion' comp.id %}" method="POST" class="inline">
@@ -176,7 +180,9 @@
                                         </div>
                                         <div>
                                             {% if comp.verified %}
-                                                <span class="text-[10px] font-medium text-green-700 bg-green-50 px-2 py-1 rounded">Verified</span>
+                                                <span class="text-[10px] font-medium text-green-700 bg-green-50 px-2 py-1 rounded">
+                                                    Verified{% if comp.verified_by %} by {{ comp.verified_by.first_name|default:comp.verified_by.username }}{% endif %}
+                                                </span>
                                             {% else %}
                                                 <form action="{% url 'teacher_verify_completion' comp.id %}" method="POST" class="inline">
                                                     {% csrf_token %}
